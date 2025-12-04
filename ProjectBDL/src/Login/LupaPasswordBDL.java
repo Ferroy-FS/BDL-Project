@@ -4,19 +4,72 @@
  */
 package Login;
 
+import javax.swing.JOptionPane;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 /**
  *
  * @author LEGION
  */
 public class LupaPasswordBDL extends javax.swing.JFrame {
-    
+
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(LupaPasswordBDL.class.getName());
 
     /**
      * Creates new form LupaPasswordBDL
      */
-    public LupaPasswordBDL() {
+    private String username;
+
+    public LupaPasswordBDL(String username) {
         initComponents();
+        this.username = username;
+
+        btnEnter.addActionListener(e -> ubahPassword());
+
+        // Tambahkan WindowListener untuk handle close
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                new LoginBDL().setVisible(true);
+            }
+        });
+    }
+
+    private void ubahPassword() {
+        String passwordBaru = txtPasswordbaru.getText();
+        String konfirmasi = txtKonfirmasiPasswordBaru.getText();
+
+        if (!passwordBaru.equals(konfirmasi)) {
+            JOptionPane.showMessageDialog(this, "Password baru dan konfirmasi tidak cocok!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+
+        try {
+            conn = ConnectDatabaseLoginBDL.getConnection();
+
+            String sql = "UPDATE login SET passwordnya = ? WHERE username = ?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, passwordBaru);
+            pstmt.setString(2, username);
+
+            int rowsUpdated = pstmt.executeUpdate();
+
+            if (rowsUpdated > 0) {
+                JOptionPane.showMessageDialog(this, "Password berhasil diubah!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                new LoginBDL().setVisible(true);
+                dispose();
+            }
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        } finally {
+            ConnectDatabaseLoginBDL.closeConnection(conn, pstmt, null);
+        }
     }
 
     /**
@@ -113,6 +166,7 @@ public class LupaPasswordBDL extends javax.swing.JFrame {
 
     private void btnEnterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEnterActionPerformed
         // TODO add your handling code here:
+
     }//GEN-LAST:event_btnEnterActionPerformed
 
     /**

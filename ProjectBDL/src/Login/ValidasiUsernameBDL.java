@@ -4,12 +4,15 @@
  */
 package Login;
 
+import java.sql.*;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author LEGION
  */
 public class ValidasiUsernameBDL extends javax.swing.JFrame {
-    
+
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ValidasiUsernameBDL.class.getName());
 
     /**
@@ -17,6 +20,49 @@ public class ValidasiUsernameBDL extends javax.swing.JFrame {
      */
     public ValidasiUsernameBDL() {
         initComponents();
+
+        btnValidasi.addActionListener(e -> validasiUsername());
+        btnKembaliKeLogin.addActionListener(e -> {
+            new LoginBDL().setVisible(true);
+            dispose();
+        });
+    }
+
+// Tambahkan method validasiUsername()
+    private void validasiUsername() {
+        String username = txtUsername.getText().trim();
+
+        if (username.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Username tidak boleh kosong!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectDatabaseLoginBDL.getConnection();
+
+            String sql = "SELECT username FROM login WHERE username = ?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                // Username valid, buka form pertanyaan keamanan
+                new ValidasiPertanyaanKeamananBDL(username).setVisible(true);
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, "Username tidak ditemukan!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        } finally {
+            ConnectDatabaseLoginBDL.closeConnection(conn, pstmt, rs);
+        }
     }
 
     /**

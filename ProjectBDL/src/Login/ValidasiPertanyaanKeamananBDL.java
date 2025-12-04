@@ -4,12 +4,17 @@
  */
 package Login;
 
+import javax.swing.JOptionPane;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.ResultSet;
 /**
  *
  * @author LEGION
  */
 public class ValidasiPertanyaanKeamananBDL extends javax.swing.JFrame {
-    
+
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ValidasiPertanyaanKeamananBDL.class.getName());
 
     /**
@@ -17,6 +22,87 @@ public class ValidasiPertanyaanKeamananBDL extends javax.swing.JFrame {
      */
     public ValidasiPertanyaanKeamananBDL() {
         initComponents();
+    }
+
+    private String username;
+
+    public ValidasiPertanyaanKeamananBDL(String username) {
+        initComponents();
+        this.username = username;
+        loadPertanyaan();
+
+        btnEnter.addActionListener(e -> validasiJawaban());
+        btnBatal.addActionListener(e -> {
+            new LoginBDL().setVisible(true);
+            dispose();
+        });
+    }
+
+// Tambahkan method loadPertanyaan()
+    private void loadPertanyaan() {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectDatabaseLoginBDL.getConnection();
+
+            String sql = "SELECT question FROM security_question WHERE username = ?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                txtDisplayPertanyaan.setText(rs.getString("question"));
+            }
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        } finally {
+            ConnectDatabaseLoginBDL.closeConnection(conn, pstmt, rs);
+        }
+    }
+
+// Tambahkan method validasiJawaban()
+    private void validasiJawaban() {
+        String jawaban = txtJawab.getText().trim();
+
+        if (jawaban.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Jawaban tidak boleh kosong!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectDatabaseLoginBDL.getConnection();
+
+            String sql = "SELECT answer_hash FROM security_question WHERE username = ?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                String storedAnswer = rs.getString("answer_hash");
+
+                // Dalam aplikasi nyata, seharusnya membandingkan hash
+                if (jawaban.equals(storedAnswer)) {
+                    new LupaPasswordBDL(username).setVisible(true);
+                    dispose();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Jawaban salah!", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        } finally {
+            ConnectDatabaseLoginBDL.closeConnection(conn, pstmt, rs);
+        }
     }
 
     /**

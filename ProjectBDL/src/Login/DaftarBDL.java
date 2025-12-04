@@ -4,12 +4,15 @@
  */
 package Login;
 
+import java.sql.*;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author LEGION
  */
 public class DaftarBDL extends javax.swing.JFrame {
-    
+
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(DaftarBDL.class.getName());
 
     /**
@@ -17,6 +20,91 @@ public class DaftarBDL extends javax.swing.JFrame {
      */
     public DaftarBDL() {
         initComponents();
+        btnKonfirmasi.addActionListener(e -> daftarAkun());
+    }
+
+    // Tambahkan method daftarAkun()
+    private void daftarAkun() {
+        String username = txtUsername.getText().trim();
+        String password = new String(PasswordField.getPassword());
+        String confirmPassword = new String(ConfirmPasswordField.getPassword());
+        String question = txtPertanyaan.getText().trim();
+        String answer = txtJawaban.getText().trim();
+
+        // Validasi input
+        if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()
+                || question.isEmpty() || answer.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Semua field harus diisi!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (!password.equals(confirmPassword)) {
+            JOptionPane.showMessageDialog(this, "Password dan konfirmasi password tidak cocok!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Connection conn = null;
+        PreparedStatement pstmtCheck = null;
+        PreparedStatement pstmtInsertLogin = null;
+        PreparedStatement pstmtInsertSecurity = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectDatabaseLoginBDL.getConnection();
+
+            // Cek apakah username sudah ada
+            String checkSQL = "SELECT username FROM login WHERE username = ?";
+            pstmtCheck = conn.prepareStatement(checkSQL);
+            pstmtCheck.setString(1, username);
+            rs = pstmtCheck.executeQuery();
+
+            if (rs.next()) {
+                JOptionPane.showMessageDialog(this, "Username sudah digunakan!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Mulai transaksi
+            conn.setAutoCommit(false);
+
+            // Insert ke tabel login
+            String insertLoginSQL = "INSERT INTO login (username, passwordnya) VALUES (?, ?)";
+            pstmtInsertLogin = conn.prepareStatement(insertLoginSQL);
+            pstmtInsertLogin.setString(1, username);
+            pstmtInsertLogin.setString(2, password); // Dalam aplikasi nyata, password harus di-hash
+            pstmtInsertLogin.executeUpdate();
+
+            // Insert ke tabel security_question
+            String insertSecuritySQL = "INSERT INTO security_question (username, question, answer_hash) VALUES (?, ?, ?)";
+            pstmtInsertSecurity = conn.prepareStatement(insertSecuritySQL);
+            pstmtInsertSecurity.setString(1, username);
+            pstmtInsertSecurity.setString(2, question);
+            pstmtInsertSecurity.setString(3, answer); // Dalam aplikasi nyata, jawaban harus di-hash
+            pstmtInsertSecurity.executeUpdate();
+
+            // Commit transaksi
+            conn.commit();
+
+            JOptionPane.showMessageDialog(this, "Pendaftaran berhasil!", "Success", JOptionPane.INFORMATION_MESSAGE);
+
+            // Kembali ke login
+            this.dispose();
+            new LoginBDL().setVisible(true);
+
+        } catch (SQLException ex) {
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        } finally {
+            ConnectDatabaseLoginBDL.closeConnection(conn, pstmtInsertSecurity, rs);
+            ConnectDatabaseLoginBDL.closeConnection(null, pstmtCheck, null);
+            ConnectDatabaseLoginBDL.closeConnection(null, pstmtInsertLogin, null);
+        }
     }
 
     /**

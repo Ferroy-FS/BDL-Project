@@ -4,12 +4,15 @@
  */
 package Login;
 
+import java.sql.*;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author LEGION
  */
 public class LoginBDL extends javax.swing.JFrame {
-    
+
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(LoginBDL.class.getName());
 
     /**
@@ -17,6 +20,65 @@ public class LoginBDL extends javax.swing.JFrame {
      */
     public LoginBDL() {
         initComponents();
+
+        btnLogin.addActionListener(e -> login());
+
+        // Set ActionListener untuk label yang bisa diklik
+        lblBelumPunyaAkun.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                new DaftarBDL().setVisible(true);
+                dispose();
+            }
+        });
+
+        lblLupaPassword.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                new ValidasiUsernameBDL().setVisible(true);
+                dispose();
+            }
+        });
+
+        lblLupaUsername.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                new LupaUsernameBDL().setVisible(true);
+                dispose();
+            }
+        });
+    }
+
+// Tambahkan method login()
+    private void login() {
+        String username = txtUsername.getText().trim();
+        String password = new String(PasswordField.getPassword());
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectDatabaseLoginBDL.getConnection();
+
+            String sql = "SELECT * FROM login WHERE username = ? AND passwordnya = ?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            pstmt.setString(2, password);
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                JOptionPane.showMessageDialog(this, "Login berhasil!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                // Di sini Anda bisa membuka form utama aplikasi
+                // new MainForm().setVisible(true);
+                // this.dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, "Username atau password salah!", "Login Failed", JOptionPane.ERROR_MESSAGE);
+            }
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        } finally {
+            ConnectDatabaseLoginBDL.closeConnection(conn, pstmt, rs);
+        }
     }
 
     /**
@@ -141,23 +203,43 @@ public class LoginBDL extends javax.swing.JFrame {
 
     private void lblBelumPunyaAkunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblBelumPunyaAkunMouseClicked
         // TODO add your handling code here:
-        
+
     }//GEN-LAST:event_lblBelumPunyaAkunMouseClicked
 
     private void lblLupaPasswordMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblLupaPasswordMouseClicked
         // TODO add your handling code here:
-        
+
     }//GEN-LAST:event_lblLupaPasswordMouseClicked
 
     private void lblLupaUsernameMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblLupaUsernameMouseClicked
         // TODO add your handling code here:
-        
+
     }//GEN-LAST:event_lblLupaUsernameMouseClicked
 
     /**
      * @param args the command line arguments
      */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
+            logger.log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
 
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(() -> new LoginBDL().setVisible(true));
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPasswordField PasswordField;
     private javax.swing.JButton btnLogin;

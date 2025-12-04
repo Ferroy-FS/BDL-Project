@@ -4,19 +4,114 @@
  */
 package Login;
 
+import javax.swing.JOptionPane;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.ResultSet;
+
 /**
  *
  * @author LEGION
  */
 public class UbahUsernameBDL extends javax.swing.JFrame {
-    
+
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(UbahUsernameBDL.class.getName());
 
     /**
      * Creates new form UbahUsernameBDL
      */
-    public UbahUsernameBDL() {
+    private String usernameLama;
+
+    public UbahUsernameBDL(String usernameLama) {
         initComponents();
+        this.usernameLama = usernameLama;
+
+        btnEnter.addActionListener(e -> ubahUsername());
+    }
+
+// Tambahkan method ubahUsername()
+    private void ubahUsername() {
+        String usernameBaru = txtUsernameBaru.getText().trim();
+        String password = new String(PasswordField.getPassword());
+
+        if (usernameBaru.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Username baru tidak boleh kosong!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Connection conn = null;
+        PreparedStatement pstmtCheck = null;
+        PreparedStatement pstmtUpdateLogin = null;
+        PreparedStatement pstmtUpdateSecurity = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectDatabaseLoginBDL.getConnection();
+
+            // Cek apakah username baru sudah ada
+            String checkSQL = "SELECT username FROM login WHERE username = ?";
+            pstmtCheck = conn.prepareStatement(checkSQL);
+            pstmtCheck.setString(1, usernameBaru);
+            rs = pstmtCheck.executeQuery();
+
+            if (rs.next()) {
+                JOptionPane.showMessageDialog(this, "Username baru sudah digunakan!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Verifikasi password
+            String verifySQL = "SELECT username FROM login WHERE username = ? AND passwordnya = ?";
+            pstmtCheck = conn.prepareStatement(verifySQL);
+            pstmtCheck.setString(1, usernameLama);
+            pstmtCheck.setString(2, password);
+            rs = pstmtCheck.executeQuery();
+
+            if (!rs.next()) {
+                JOptionPane.showMessageDialog(this, "Password salah!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Mulai transaksi
+            conn.setAutoCommit(false);
+
+            // Update tabel login
+            String updateLoginSQL = "UPDATE login SET username = ? WHERE username = ?";
+            pstmtUpdateLogin = conn.prepareStatement(updateLoginSQL);
+            pstmtUpdateLogin.setString(1, usernameBaru);
+            pstmtUpdateLogin.setString(2, usernameLama);
+            pstmtUpdateLogin.executeUpdate();
+
+            // Update tabel security_question
+            String updateSecuritySQL = "UPDATE security_question SET username = ? WHERE username = ?";
+            pstmtUpdateSecurity = conn.prepareStatement(updateSecuritySQL);
+            pstmtUpdateSecurity.setString(1, usernameBaru);
+            pstmtUpdateSecurity.setString(2, usernameLama);
+            pstmtUpdateSecurity.executeUpdate();
+
+            // Commit transaksi
+            conn.commit();
+
+            JOptionPane.showMessageDialog(this, "Username berhasil diubah!", "Success", JOptionPane.INFORMATION_MESSAGE);
+
+            new LoginBDL().setVisible(true);
+            dispose();
+
+        } catch (SQLException ex) {
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        } finally {
+            ConnectDatabaseLoginBDL.closeConnection(conn, pstmtUpdateSecurity, rs);
+            ConnectDatabaseLoginBDL.closeConnection(null, pstmtCheck, null);
+            ConnectDatabaseLoginBDL.closeConnection(null, pstmtUpdateLogin, null);
+        }
     }
 
     /**

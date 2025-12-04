@@ -4,12 +4,17 @@
  */
 package Login;
 
+import java.sql.*;
+import javax.swing.JOptionPane;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author LEGION
  */
 public class LupaUsernameBDL extends javax.swing.JFrame {
-    
+
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(LupaUsernameBDL.class.getName());
 
     /**
@@ -17,6 +22,82 @@ public class LupaUsernameBDL extends javax.swing.JFrame {
      */
     public LupaUsernameBDL() {
         initComponents();
+
+        btnEnter.addActionListener(e -> cariUsername());
+
+        // Tambahkan WindowListener
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                new LoginBDL().setVisible(true);
+            }
+        });
+    }
+
+// Tambahkan method cariUsername()
+    private void cariUsername() {
+        String kataKunci = txtKataKunciUsername.getText().trim();
+        String password = new String(PasswordField.getPassword());
+
+        if (kataKunci.length() < 3) {
+            JOptionPane.showMessageDialog(this, "Masukkan minimal 3 karakter untuk pencarian!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConnectDatabaseLoginBDL.getConnection();
+
+            // Cari username yang mengandung kata kunci (case-insensitive)
+            String sql = "SELECT username FROM login WHERE LOWER(username) LIKE LOWER(?) AND passwordnya = ?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, "%" + kataKunci + "%");
+            pstmt.setString(2, password);
+            rs = pstmt.executeQuery();
+
+            List<String> usernames = new ArrayList<>();
+            while (rs.next()) {
+                usernames.add(rs.getString("username"));
+            }
+
+            if (usernames.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Password salah atau tidak ada username yang cocok!", "Error", JOptionPane.ERROR_MESSAGE);
+            } else if (usernames.size() == 1) {
+                // Jika hanya satu username yang ditemukan, langsung buka form ubah username
+                new UbahUsernameBDL(usernames.get(0)).setVisible(true);
+                dispose();
+            } else {
+                // Jika banyak username, tampilkan pilihan
+                String message = "Ditemukan " + usernames.size() + " username:\n";
+                for (int i = 0; i < usernames.size(); i++) {
+                    message += (i + 1) + ". " + usernames.get(i) + "\n";
+                }
+                message += "\nPilih nomor username yang ingin diubah:";
+
+                String input = JOptionPane.showInputDialog(this, message, "Pilih Username", JOptionPane.QUESTION_MESSAGE);
+
+                if (input != null) {
+                    try {
+                        int index = Integer.parseInt(input.trim()) - 1;
+                        if (index >= 0 && index < usernames.size()) {
+                            new UbahUsernameBDL(usernames.get(index)).setVisible(true);
+                            dispose();
+                        }
+                    } catch (NumberFormatException e) {
+                        JOptionPane.showMessageDialog(this, "Input tidak valid!", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        } finally {
+            ConnectDatabaseLoginBDL.closeConnection(conn, pstmt, rs);
+        }
     }
 
     /**
