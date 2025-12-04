@@ -40,29 +40,38 @@ public class FormStokLogistik extends javax.swing.JPanel {
 
         pnlHeaderInv.setBackground(new java.awt.Color(255, 255, 255));
         pnlHeaderInv.setForeground(new java.awt.Color(255, 255, 255));
-        pnlHeaderInv.setLayout(new java.awt.BorderLayout());
+        pnlHeaderInv.setLayout(new java.awt.GridLayout(2, 1));
 
         jLabel2.setBackground(new java.awt.Color(255, 255, 255));
         jLabel2.setForeground(new java.awt.Color(0, 0, 0));
-        jLabel2.setText("<html><b>📦 MONITOR KETERSEDIAAN BARANG LOGISTIK</b>\n<span style='background-color:#e74c3c; color:white'</html>\n");
+        jLabel2.setText("<html><b>📦 MONITOR KETERSEDIAAN BARANG LOGISTIK</b> <span style='background-color:#e74c3c; color:white'</html> ");
         jLabel2.setToolTipText("");
         jLabel2.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 0, 5, 0));
         jLabel2.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         jLabel2.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
-        pnlHeaderInv.add(jLabel2, java.awt.BorderLayout.NORTH);
+        pnlHeaderInv.add(jLabel2);
 
         jToolBar1.setBackground(new java.awt.Color(255, 255, 255));
+        jToolBar1.setBorder(null);
         jToolBar1.setForeground(new java.awt.Color(255, 255, 255));
         jToolBar1.setRollover(true);
+        jToolBar1.setBorderPainted(false);
 
+        btnRefresh.setBackground(new java.awt.Color(255, 255, 255));
+        btnRefresh.setForeground(new java.awt.Color(0, 0, 0));
         btnRefresh.setText("🔄 Refresh");
         btnRefresh.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnRefresh.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnRefresh.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRefreshActionPerformed(evt);
+            }
+        });
         jToolBar1.add(btnRefresh);
 
-        pnlHeaderInv.add(jToolBar1, java.awt.BorderLayout.SOUTH);
+        pnlHeaderInv.add(jToolBar1);
 
-        add(pnlHeaderInv, java.awt.BorderLayout.CENTER);
+        add(pnlHeaderInv, java.awt.BorderLayout.NORTH);
 
         jScrollPane1.setBackground(new java.awt.Color(255, 255, 255));
         jScrollPane1.setForeground(new java.awt.Color(0, 0, 0));
@@ -80,8 +89,12 @@ public class FormStokLogistik extends javax.swing.JPanel {
         ));
         jScrollPane1.setViewportView(jTable1);
 
-        add(jScrollPane1, java.awt.BorderLayout.PAGE_END);
+        add(jScrollPane1, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnRefreshActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnRefresh;
