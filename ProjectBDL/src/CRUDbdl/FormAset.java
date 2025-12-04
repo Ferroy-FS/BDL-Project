@@ -26,16 +26,130 @@ public class FormAset extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel1 = new javax.swing.JLabel();
+        jToolBar1 = new javax.swing.JToolBar();
+        btnRefresh = new javax.swing.JButton();
+        jSeparator3 = new javax.swing.JToolBar.Separator();
+        btnDetail = new javax.swing.JButton();
+        btnEdit = new javax.swing.JButton();
+        btnDelete = new javax.swing.JButton();
+        jSeparator4 = new javax.swing.JToolBar.Separator();
+        btnSusut = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblAset = new javax.swing.JTable();
 
+        setBackground(new java.awt.Color(255, 255, 255));
+        setForeground(new java.awt.Color(255, 255, 255));
         setLayout(new java.awt.BorderLayout());
 
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("Aset");
-        add(jLabel1, java.awt.BorderLayout.PAGE_START);
+        jToolBar1.setBackground(new java.awt.Color(255, 255, 255));
+        jToolBar1.setForeground(new java.awt.Color(255, 255, 255));
+        jToolBar1.setRollover(true);
+
+        btnRefresh.setBackground(new java.awt.Color(255, 255, 255));
+        btnRefresh.setForeground(new java.awt.Color(0, 0, 0));
+        btnRefresh.setText("🔄 Refresh");
+        btnRefresh.setFocusable(false);
+        btnRefresh.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnRefresh.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(btnRefresh);
+        jToolBar1.add(jSeparator3);
+
+        btnDetail.setBackground(new java.awt.Color(255, 255, 255));
+        btnDetail.setForeground(new java.awt.Color(0, 0, 0));
+        btnDetail.setText("📄 Detail & Riwayat");
+        btnDetail.setFocusable(false);
+        btnDetail.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnDetail.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnDetail.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDetailActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(btnDetail);
+
+        btnEdit.setBackground(new java.awt.Color(255, 255, 255));
+        btnEdit.setForeground(new java.awt.Color(0, 0, 0));
+        btnEdit.setText("✏️ Edit");
+        btnEdit.setFocusable(false);
+        btnEdit.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnEdit.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnEdit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEditActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(btnEdit);
+
+        btnDelete.setBackground(new java.awt.Color(255, 255, 255));
+        btnDelete.setForeground(new java.awt.Color(0, 0, 0));
+        btnDelete.setText("🗑️ Hapus Aset");
+        btnDelete.setFocusable(false);
+        btnDelete.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnDelete.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(btnDelete);
+        jToolBar1.add(jSeparator4);
+
+        btnSusut.setBackground(new java.awt.Color(102, 255, 255));
+        btnSusut.setForeground(new java.awt.Color(0, 0, 0));
+        btnSusut.setText("📉 Proses Penyusutan");
+        btnSusut.setFocusable(false);
+        btnSusut.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnSusut.setOpaque(true);
+        btnSusut.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnSusut.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSusutActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(btnSusut);
+
+        add(jToolBar1, java.awt.BorderLayout.PAGE_START);
+
+        jScrollPane1.setBackground(java.awt.Color.white);
+        jScrollPane1.setForeground(new java.awt.Color(255, 255, 255));
+
+        tblAset.setBackground(new java.awt.Color(255, 255, 255));
+        tblAset.setForeground(new java.awt.Color(255, 255, 255));
+        tblAset.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
+            },
+            new String [] {
+                "Kode Aset", "Nama Aset", "Kategori", "Lokasi", "Penanggung Jawab", "Nilai Buku", "Status"
+            }
+        ));
+        tblAset.setSelectionBackground(new java.awt.Color(255, 255, 255));
+        tblAset.setSelectionForeground(new java.awt.Color(0, 0, 0));
+        jScrollPane1.setViewportView(tblAset);
+
+        add(jScrollPane1, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btnDetailActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDetailActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnDetailActionPerformed
+
+    private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnEditActionPerformed
+
+    private void btnSusutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSusutActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnSusutActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JButton btnDelete;
+    private javax.swing.JButton btnDetail;
+    private javax.swing.JButton btnEdit;
+    private javax.swing.JButton btnRefresh;
+    private javax.swing.JButton btnSusut;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JToolBar.Separator jSeparator3;
+    private javax.swing.JToolBar.Separator jSeparator4;
+    private javax.swing.JToolBar jToolBar1;
+    private javax.swing.JTable tblAset;
     // End of variables declaration//GEN-END:variables
 }
