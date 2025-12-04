@@ -21,16 +21,7 @@ public class LoginBDL extends javax.swing.JFrame {
     public LoginBDL() {
         initComponents();
 
-        btnLogin.addActionListener(e -> login());
-
-        // Set ActionListener untuk label yang bisa diklik
-        lblBelumPunyaAkun.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                new DaftarBDL().setVisible(true);
-                dispose();
-            }
-        });
-
+//        btnLogin.addActionListener(e -> login());
         lblLupaPassword.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 new ValidasiUsernameBDL().setVisible(true);
@@ -44,6 +35,12 @@ public class LoginBDL extends javax.swing.JFrame {
                 dispose();
             }
         });
+    }
+
+    private void openMainApplication() {
+        CRUDbdl.MainFrame mainForm = new CRUDbdl.MainFrame();
+        mainForm.setVisible(true);
+        this.dispose();
     }
 
 // Tambahkan method login()
@@ -96,7 +93,6 @@ public class LoginBDL extends javax.swing.JFrame {
         txtUsername = new javax.swing.JTextField();
         PasswordField = new javax.swing.JPasswordField();
         btnLogin = new javax.swing.JButton();
-        lblBelumPunyaAkun = new javax.swing.JLabel() { public java.awt.Cursor getCursor() { return new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR); } };
         lblLupaPassword = new javax.swing.JLabel() { public java.awt.Cursor getCursor() { return new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR); } };
         lblLupaUsername = new javax.swing.JLabel() { public java.awt.Cursor getCursor() { return new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR); } };
 
@@ -116,12 +112,9 @@ public class LoginBDL extends javax.swing.JFrame {
         });
 
         btnLogin.setText("Login");
-
-        lblBelumPunyaAkun.setText("Belum punya akun? Klik disini");
-        lblBelumPunyaAkun.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        lblBelumPunyaAkun.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                lblBelumPunyaAkunMouseClicked(evt);
+        btnLogin.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLoginActionPerformed(evt);
             }
         });
 
@@ -160,13 +153,10 @@ public class LoginBDL extends javax.swing.JFrame {
                                     .addComponent(lblLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(txtUsername)
                                     .addComponent(PasswordField, javax.swing.GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE))
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                .addContainerGap(51, Short.MAX_VALUE))))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(lblLupaPassword)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(lblBelumPunyaAkun)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 86, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(lblLupaUsername)
                         .addGap(30, 30, 30))))
         );
@@ -187,24 +177,18 @@ public class LoginBDL extends javax.swing.JFrame {
                 .addComponent(btnLogin)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblBelumPunyaAkun)
-                    .addComponent(lblLupaUsername))
-                .addGap(18, 18, 18)
-                .addComponent(lblLupaPassword)
-                .addContainerGap(33, Short.MAX_VALUE))
+                    .addComponent(lblLupaUsername)
+                    .addComponent(lblLupaPassword))
+                .addContainerGap(67, Short.MAX_VALUE))
         );
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void txtUsernameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtUsernameActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtUsernameActionPerformed
-
-    private void lblBelumPunyaAkunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblBelumPunyaAkunMouseClicked
-        // TODO add your handling code here:
-
-    }//GEN-LAST:event_lblBelumPunyaAkunMouseClicked
 
     private void lblLupaPasswordMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblLupaPasswordMouseClicked
         // TODO add your handling code here:
@@ -216,6 +200,11 @@ public class LoginBDL extends javax.swing.JFrame {
 
     }//GEN-LAST:event_lblLupaUsernameMouseClicked
 
+    private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
+        // TODO add your handling code here:
+        openMainApplication();
+    }//GEN-LAST:event_btnLoginActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -223,7 +212,7 @@ public class LoginBDL extends javax.swing.JFrame {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -243,7 +232,6 @@ public class LoginBDL extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPasswordField PasswordField;
     private javax.swing.JButton btnLogin;
-    private javax.swing.JLabel lblBelumPunyaAkun;
     private javax.swing.JLabel lblLogin;
     private javax.swing.JLabel lblLupaPassword;
     private javax.swing.JLabel lblLupaUsername;
