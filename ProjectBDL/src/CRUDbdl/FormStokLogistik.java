@@ -26,16 +26,69 @@ public class FormStokLogistik extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel1 = new javax.swing.JLabel();
+        pnlHeaderInv = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        jToolBar1 = new javax.swing.JToolBar();
+        btnRefresh = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
 
+        setBackground(new java.awt.Color(255, 255, 255));
+        setBorder(javax.swing.BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        setForeground(new java.awt.Color(255, 255, 255));
         setLayout(new java.awt.BorderLayout());
 
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("Stok & Logistik");
-        add(jLabel1, java.awt.BorderLayout.PAGE_START);
+        pnlHeaderInv.setBackground(new java.awt.Color(255, 255, 255));
+        pnlHeaderInv.setForeground(new java.awt.Color(255, 255, 255));
+        pnlHeaderInv.setLayout(new java.awt.BorderLayout());
+
+        jLabel2.setBackground(new java.awt.Color(255, 255, 255));
+        jLabel2.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel2.setText("<html><b>📦 MONITOR KETERSEDIAAN BARANG LOGISTIK</b>\n<span style='background-color:#e74c3c; color:white'</html>\n");
+        jLabel2.setToolTipText("");
+        jLabel2.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 0, 5, 0));
+        jLabel2.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+        jLabel2.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
+        pnlHeaderInv.add(jLabel2, java.awt.BorderLayout.NORTH);
+
+        jToolBar1.setBackground(new java.awt.Color(255, 255, 255));
+        jToolBar1.setForeground(new java.awt.Color(255, 255, 255));
+        jToolBar1.setRollover(true);
+
+        btnRefresh.setText("🔄 Refresh");
+        btnRefresh.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnRefresh.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(btnRefresh);
+
+        pnlHeaderInv.add(jToolBar1, java.awt.BorderLayout.SOUTH);
+
+        add(pnlHeaderInv, java.awt.BorderLayout.CENTER);
+
+        jScrollPane1.setBackground(new java.awt.Color(255, 255, 255));
+        jScrollPane1.setForeground(new java.awt.Color(0, 0, 0));
+
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
+            },
+            new String [] {
+                "ID Inventaris", "Kategori", "Nama Barang", "Satuan", "Stok Saat Ini", "Stok Minimum", "Status Ketersediaan"
+            }
+        ));
+        jScrollPane1.setViewportView(jTable1);
+
+        add(jScrollPane1, java.awt.BorderLayout.PAGE_END);
     }// </editor-fold>//GEN-END:initComponents
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JButton btnRefresh;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTable jTable1;
+    private javax.swing.JToolBar jToolBar1;
+    private javax.swing.JPanel pnlHeaderInv;
     // End of variables declaration//GEN-END:variables
 }

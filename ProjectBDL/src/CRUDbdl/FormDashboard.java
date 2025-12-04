@@ -27,16 +27,106 @@ public class FormDashboard extends javax.swing.JPanel {
     private void initComponents() {
 
         jLabel2 = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
+        jPanel3 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jPanel5 = new javax.swing.JPanel();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
 
-        setBackground(new java.awt.Color(255, 153, 102));
+        setBackground(java.awt.Color.white);
+        setBorder(javax.swing.BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        setForeground(new java.awt.Color(255, 255, 255));
         setLayout(new java.awt.BorderLayout());
 
-        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setText("Dashboard");
+        jLabel2.setBackground(new java.awt.Color(255, 255, 255));
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel2.setText("Overview");
+        jLabel2.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 20, 1));
         add(jLabel2, java.awt.BorderLayout.PAGE_START);
+
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel1.setLayout(new java.awt.BorderLayout());
+
+        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel2.setLayout(new java.awt.GridLayout(1, 3, 20, 0));
+
+        jPanel3.setBackground(new java.awt.Color(41, 128, 185));
+        jPanel3.setBorder(javax.swing.BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        jPanel3.setLayout(new java.awt.BorderLayout());
+
+        jLabel1.setBackground(new java.awt.Color(255, 255, 255));
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel1.setText("Rp. 0");
+        jPanel3.add(jLabel1, java.awt.BorderLayout.CENTER);
+
+        jLabel3.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel3.setText("Total Nilai Aset");
+        jPanel3.add(jLabel3, java.awt.BorderLayout.PAGE_START);
+
+        jPanel2.add(jPanel3);
+
+        jPanel4.setBackground(new java.awt.Color(192, 57, 43));
+        jPanel4.setBorder(javax.swing.BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        jPanel4.setLayout(new java.awt.BorderLayout());
+
+        jLabel4.setForeground(java.awt.Color.white);
+        jLabel4.setText("Stok Kritis");
+        jPanel4.add(jLabel4, java.awt.BorderLayout.LINE_START);
+
+        jLabel5.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        jLabel5.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel5.setText("0 Item");
+        jPanel4.add(jLabel5, java.awt.BorderLayout.PAGE_END);
+
+        jPanel2.add(jPanel4);
+
+        jPanel5.setBackground(new java.awt.Color(243, 156, 18));
+        jPanel5.setBorder(javax.swing.BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        jPanel5.setLayout(new java.awt.BorderLayout());
+
+        jLabel6.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel6.setText("Servis Berjalan");
+        jPanel5.add(jLabel6, java.awt.BorderLayout.CENTER);
+
+        jLabel7.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        jLabel7.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel7.setText("0 Tiket");
+        jPanel5.add(jLabel7, java.awt.BorderLayout.PAGE_END);
+
+        jPanel2.add(jPanel5);
+
+        jPanel1.add(jPanel2, java.awt.BorderLayout.PAGE_START);
+
+        jLabel8.setFont(new java.awt.Font("Segoe UI", 2, 16)); // NOI18N
+        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel8.setText("<html><center>Sistem Siap Digunakan.<br>Pilih menu di samping untuk mulai.</center></html> ");
+        jPanel1.add(jLabel8, java.awt.BorderLayout.CENTER);
+
+        add(jPanel1, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
     // End of variables declaration//GEN-END:variables
 }
