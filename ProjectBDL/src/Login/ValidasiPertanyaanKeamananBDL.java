@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
+
 /**
  *
  * @author LEGION
@@ -47,29 +48,35 @@ public class ValidasiPertanyaanKeamananBDL extends javax.swing.JFrame {
         try {
             conn = ConnectDatabaseLoginBDL.getConnection();
 
-            String sql = "SELECT question FROM security_question WHERE username = ?";
+            // PERUBAHAN: Mengambil pertanyaan dari tabel pegawai
+            String sql = "SELECT pertanyaan FROM pegawai WHERE username = ?";
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, username);
             rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                txtDisplayPertanyaan.setText(rs.getString("question"));
+                String pertanyaan = rs.getString("pertanyaan");
+                if (pertanyaan != null && !pertanyaan.trim().isEmpty()) {
+                    txtDisplayPertanyaan.setText(pertanyaan);
+                } else {
+                    txtDisplayPertanyaan.setText("Tidak ada pertanyaan keamanan yang diatur");
+                }
             }
 
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
         } finally {
             ConnectDatabaseLoginBDL.closeConnection(conn, pstmt, rs);
         }
     }
 
-// Tambahkan method validasiJawaban()
+// Method validasiJawaban() yang sudah disesuaikan
     private void validasiJawaban() {
         String jawaban = txtJawab.getText().trim();
 
         if (jawaban.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Jawaban tidak boleh kosong!", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Jawaban tidak boleh kosong!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -80,25 +87,32 @@ public class ValidasiPertanyaanKeamananBDL extends javax.swing.JFrame {
         try {
             conn = ConnectDatabaseLoginBDL.getConnection();
 
-            String sql = "SELECT answer_hash FROM security_question WHERE username = ?";
+            // PERUBAHAN: Mengambil jawaban dari tabel pegawai
+            String sql = "SELECT jawaban FROM pegawai WHERE username = ?";
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, username);
             rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                String storedAnswer = rs.getString("answer_hash");
+                String storedAnswer = rs.getString("jawaban");
 
-                // Dalam aplikasi nyata, seharusnya membandingkan hash
-                if (jawaban.equals(storedAnswer)) {
+                // Periksa apakah jawaban sudah diatur
+                if (storedAnswer == null || storedAnswer.trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Jawaban keamanan belum diatur!", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Bandingkan jawaban (case-insensitive)
+                if (jawaban.equalsIgnoreCase(storedAnswer.trim())) {
                     new LupaPasswordBDL(username).setVisible(true);
                     dispose();
                 } else {
-                    JOptionPane.showMessageDialog(this, "Jawaban salah!", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Jawaban salah!", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
 
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
         } finally {
             ConnectDatabaseLoginBDL.closeConnection(conn, pstmt, rs);
@@ -186,7 +200,6 @@ public class ValidasiPertanyaanKeamananBDL extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBatal;
     private javax.swing.JButton btnEnter;

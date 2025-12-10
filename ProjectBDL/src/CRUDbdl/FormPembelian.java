@@ -93,20 +93,26 @@ public class FormPembelian extends javax.swing.JPanel {
         try {
             File sourceFile = new File(originalPath);
 
-            // 1. Create "uploads" folder if it doesn't exist
-            // This gets the project root folder aset
             String projectRoot = projectRoot = System.getProperty("user.dir");
+
+            File parentDir = new File(projectRoot + "/uploads");
+
             File uploadDir = null;
 
-            if (kategoriBarang.equals("aset")) {
-                uploadDir = new File(projectRoot + "/uploads/aset");
-            } else if (kategoriBarang.equals("inventaris")) {
-                uploadDir = new File(projectRoot + "/uploads/inventaris");
-
+            if (!parentDir.exists()) {
+                parentDir.mkdir();
             }
 
-            if (!uploadDir.exists()) {
-                uploadDir.mkdir();
+            if (kategoriBarang.equals("aset")) {
+                uploadDir = new File(parentDir + "/aset");
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdir();
+                }
+            } else if (kategoriBarang.equals("inventaris")) {
+                uploadDir = new File(parentDir + "/inventaris");
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdir();
+                }
             }
 
             // 2. Generate a Unique Filename
@@ -662,8 +668,8 @@ public class FormPembelian extends javax.swing.JPanel {
             String sqlItem = "insert into pembelian_aset (id_bukti, id_kategori, nama_aset_dibeli, harga, tanggal_pembelian, jumlah) values (?, ?, ?, ?, ?, ?) RETURNING id_pembelian";
             PreparedStatement psItem = conn.prepareStatement(sqlItem);
 
-            String sqlAset = "INSERT INTO aset (id_lokasi, id_kategori, id_pembelian, nama_aset, tanggal_perolehan, harga_perolehan, status_aset) VALUES (?, ?, ?, ?, ?, ?, ?)";
-            java.sql.PreparedStatement psAset = conn.prepareStatement(sqlAset);
+            String sqlAset = "INSERT INTO aset (id_lokasi, id_kategori, id_pembelian, nama_aset, tanggal_perolehan, harga_perolehan, status_aset, nilai_buku) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement psAset = conn.prepareStatement(sqlAset);
 
             String defaultLokasi = "LOK-004"; // <--- CHANGE THIS to your actual Gudang/Warehouse ID
 
@@ -699,7 +705,8 @@ public class FormPembelian extends javax.swing.JPanel {
                     psAset.setString(4, namaAset);      // "Macbook Pro"
                     psAset.setDate(5, sqlDate);
                     psAset.setDouble(6, harga);
-                    psAset.setString(7, "Baru");    // Default Status
+                    psAset.setString(7, "Tersedia");    // Default Status
+                    psAset.setDouble(8, harga);    // Default Status
 
                     psAset.addBatch(); // Queue this asset
                 }
@@ -815,87 +822,95 @@ public class FormPembelian extends javax.swing.JPanel {
     }//GEN-LAST:event_txtUploadFileInventarisActionPerformed
 
     private void btnSimpanInventarisActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanInventarisActionPerformed
-    if (tblTambahInventaris.getRowCount() == 0) {
-        javax.swing.JOptionPane.showMessageDialog(null, "Keranjang kosong!");
-        return;
-    }
-
-    String originalFile = txtUploadFileInventaris.getText();
-    if (originalFile.isEmpty()) {
-        javax.swing.JOptionPane.showMessageDialog(null, "Upload bukti dulu!");
-        return;
-    }
-
-    String finalPath = saveFileToUploads(originalFile, "inventaris");
-    if (finalPath == null) return;
-
-    java.sql.Connection conn = null;
-
-    String tanggal = txtTglPembelianAset.getText();
-
-    Date sqlDate = Date.valueOf(tanggal);
-    try {
-        conn = Login.ConnectDatabaseLoginBDL.getConnection();
-        conn.setAutoCommit(false); // Transaction Mode
-
-        // 1. Insert Bukti
-        String sqlBukti = "INSERT INTO bukti_pembelian (filepath) VALUES (?) RETURNING id_bukti";
-        java.sql.PreparedStatement psBukti = conn.prepareStatement(sqlBukti);
-        psBukti.setString(1, finalPath);
-        java.sql.ResultSet rsBukti = psBukti.executeQuery();
-        String idBukti = "";
-        if (rsBukti.next()) idBukti = rsBukti.getString(1);
-
-        String sqlMaster = "INSERT INTO inventaris_stok (id_kategori, nama_barang, stok_saat_ini, stok_minimum) VALUES (?, ?, ?, ?) RETURNING id_inventaris";
-        java.sql.PreparedStatement psMaster = conn.prepareStatement(sqlMaster);
-
-        String sqlLog = "INSERT INTO pembelian_inventaris (id_bukti, id_inventaris, tanggal_transaksi, tipe_transaksi, kuantitas, keterangan) VALUES (?, ?, ?, ?, ?, ?)";
-        java.sql.PreparedStatement psLog = conn.prepareStatement(sqlLog);
-
-        for (int i = 0; i < tblTambahInventaris.getRowCount(); i++) {
-            String namaKategori = tblTambahInventaris.getValueAt(i, 1).toString();
-            String idKategori = mapKategoriInventaris.get(namaKategori);
-            String namaBarang = tblTambahInventaris.getValueAt(i, 0).toString();
-            int jumlah = Integer.parseInt(tblTambahInventaris.getValueAt(i, 2).toString());
-
-            psMaster.setString(1, idKategori);
-            psMaster.setString(2, namaBarang);
-            psMaster.setInt(3, jumlah);
-            psMaster.setInt(4, 100);
-
-            System.out.println(idKategori + "  :  " + namaBarang + "  :  " + namaKategori);
-
-            java.sql.ResultSet rsMaster = psMaster.executeQuery();
-            String idInventaris = "";
-            if (rsMaster.next()) {
-                idInventaris = rsMaster.getString(1); // Get "INV-001"
-            }
-
-            // 2. Insert Transaction Log linked to that Item
-            psLog.setString(1, idBukti);
-            psLog.setString(2, idInventaris); // Link to the item we just created
-            psLog.setDate(3, sqlDate);
-            psLog.setString(4, "MASUK");      // tipe_transaksi (In/Out)
-            psLog.setInt(5, jumlah);          // kuantitas
-            psLog.setString(6, "Pembelian Baru"); // keterangan
-
-            psLog.addBatch();
+        if (tblTambahInventaris.getRowCount() == 0) {
+            javax.swing.JOptionPane.showMessageDialog(null, "Keranjang kosong!");
+            return;
         }
 
-        psLog.executeBatch();
+        String originalFile = txtUploadFileInventaris.getText();
+        if (originalFile.isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(null, "Upload bukti dulu!");
+            return;
+        }
 
+        String finalPath = saveFileToUploads(originalFile, "inventaris");
+        if (finalPath == null) {
+            return;
+        }
 
-        conn.commit();
-        javax.swing.JOptionPane.showMessageDialog(null, "Berhasil! Bukti: " + idBukti);
+        java.sql.Connection conn = null;
 
-        modelTambahInventaris.setRowCount(0);
-        txtTotalHargaInventaris.setText("0");
-        txtUploadFileInventaris.setText("");
+        String tanggal = txtTglPembelianAset.getText();
 
-    } catch (Exception e) {
-        try { if(conn!=null) conn.rollback(); } catch(Exception ex){}
-        System.out.println("Error: " + e);
-        javax.swing.JOptionPane.showMessageDialog(null, "Gagal: " + e.getMessage());
+        Date sqlDate = Date.valueOf(tanggal);
+        try {
+            conn = Login.ConnectDatabaseLoginBDL.getConnection();
+            conn.setAutoCommit(false); // Transaction Mode
+
+            // 1. Insert Bukti
+            String sqlBukti = "INSERT INTO bukti_pembelian (filepath) VALUES (?) RETURNING id_bukti";
+            java.sql.PreparedStatement psBukti = conn.prepareStatement(sqlBukti);
+            psBukti.setString(1, finalPath);
+            java.sql.ResultSet rsBukti = psBukti.executeQuery();
+            String idBukti = "";
+            if (rsBukti.next()) {
+                idBukti = rsBukti.getString(1);
+            }
+
+            String sqlMaster = "INSERT INTO inventaris_stok (id_kategori, nama_barang, stok_saat_ini, stok_minimum) VALUES (?, ?, ?, ?) RETURNING id_inventaris";
+            java.sql.PreparedStatement psMaster = conn.prepareStatement(sqlMaster);
+
+            String sqlLog = "INSERT INTO pembelian_inventaris (id_bukti, id_inventaris, tanggal_transaksi, tipe_transaksi, kuantitas, keterangan) VALUES (?, ?, ?, ?, ?, ?)";
+            java.sql.PreparedStatement psLog = conn.prepareStatement(sqlLog);
+
+            for (int i = 0; i < tblTambahInventaris.getRowCount(); i++) {
+                String namaKategori = tblTambahInventaris.getValueAt(i, 1).toString();
+                String idKategori = mapKategoriInventaris.get(namaKategori);
+                String namaBarang = tblTambahInventaris.getValueAt(i, 0).toString();
+                int jumlah = Integer.parseInt(tblTambahInventaris.getValueAt(i, 2).toString());
+
+                psMaster.setString(1, idKategori);
+                psMaster.setString(2, namaBarang);
+                psMaster.setInt(3, jumlah);
+                psMaster.setInt(4, 100);
+
+                System.out.println(idKategori + "  :  " + namaBarang + "  :  " + namaKategori);
+
+                java.sql.ResultSet rsMaster = psMaster.executeQuery();
+                String idInventaris = "";
+                if (rsMaster.next()) {
+                    idInventaris = rsMaster.getString(1); // Get "INV-001"
+                }
+
+                // 2. Insert Transaction Log linked to that Item
+                psLog.setString(1, idBukti);
+                psLog.setString(2, idInventaris); // Link to the item we just created
+                psLog.setDate(3, sqlDate);
+                psLog.setString(4, "MASUK");      // tipe_transaksi (In/Out)
+                psLog.setInt(5, jumlah);          // kuantitas
+                psLog.setString(6, "Pembelian Baru"); // keterangan
+
+                psLog.addBatch();
+            }
+
+            psLog.executeBatch();
+
+            conn.commit();
+            javax.swing.JOptionPane.showMessageDialog(null, "Berhasil! Bukti: " + idBukti);
+
+            modelTambahInventaris.setRowCount(0);
+            txtTotalHargaInventaris.setText("0");
+            txtUploadFileInventaris.setText("");
+
+        } catch (Exception e) {
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (Exception ex) {
+            }
+            System.out.println("Error: " + e);
+            javax.swing.JOptionPane.showMessageDialog(null, "Gagal: " + e.getMessage());
     }    }//GEN-LAST:event_btnSimpanInventarisActionPerformed
 
     private void updateTotalAset() {

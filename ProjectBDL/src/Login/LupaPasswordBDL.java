@@ -8,6 +8,7 @@ import javax.swing.JOptionPane;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+
 /**
  *
  * @author LEGION
@@ -37,11 +38,16 @@ public class LupaPasswordBDL extends javax.swing.JFrame {
     }
 
     private void ubahPassword() {
-        String passwordBaru = txtPasswordbaru.getText();
-        String konfirmasi = txtKonfirmasiPasswordBaru.getText();
+        String passwordBaru = txtPasswordbaru.getText().trim();
+        String konfirmasi = txtKonfirmasiPasswordBaru.getText().trim();
+
+        if (passwordBaru.isEmpty() || konfirmasi.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Password tidak boleh kosong!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         if (!passwordBaru.equals(konfirmasi)) {
-            JOptionPane.showMessageDialog(this, "Password baru dan konfirmasi tidak cocok!", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Password baru dan konfirmasi tidak cocok!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -51,7 +57,8 @@ public class LupaPasswordBDL extends javax.swing.JFrame {
         try {
             conn = ConnectDatabaseLoginBDL.getConnection();
 
-            String sql = "UPDATE login SET passwordnya = ? WHERE username = ?";
+            // PERUBAHAN: Update password di tabel pegawai
+            String sql = "UPDATE pegawai SET password = ? WHERE username = ?";
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, passwordBaru);
             pstmt.setString(2, username);
@@ -59,13 +66,15 @@ public class LupaPasswordBDL extends javax.swing.JFrame {
             int rowsUpdated = pstmt.executeUpdate();
 
             if (rowsUpdated > 0) {
-                JOptionPane.showMessageDialog(this, "Password berhasil diubah!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Password berhasil diubah!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 new LoginBDL().setVisible(true);
                 dispose();
+            } else {
+                JOptionPane.showMessageDialog(null, "Gagal mengubah password. Username tidak ditemukan.", "Error", JOptionPane.ERROR_MESSAGE);
             }
 
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
         } finally {
             ConnectDatabaseLoginBDL.closeConnection(conn, pstmt, null);
@@ -172,7 +181,6 @@ public class LupaPasswordBDL extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEnter;
     private javax.swing.JLabel lblKonfirmasiPasswordbaru;

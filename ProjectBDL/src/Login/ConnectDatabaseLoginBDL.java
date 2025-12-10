@@ -10,42 +10,76 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+
 /**
  *
  * @author LEGION
  */
-
 public class ConnectDatabaseLoginBDL {
+
     private static final String DB_URL = "jdbc:postgresql://localhost:5432/db_inventaris";
     private static final String USER = "postgres";
-    private static final String PASS = "0000";
-    
+    private static final String PASS = "R@jimo567";
+
     public static Connection getConnection() throws SQLException {
         try {
+            // Load PostgreSQL JDBC Driver
             Class.forName("org.postgresql.Driver");
+            // Buat dan kembalikan koneksi
             return DriverManager.getConnection(DB_URL, USER, PASS);
         } catch (ClassNotFoundException e) {
             throw new SQLException("PostgreSQL JDBC Driver not found.", e);
         }
     }
-    
+
     public static void closeConnection(Connection conn, Statement stmt, ResultSet rs) {
         try {
-            if (rs != null) rs.close();
-            if (stmt != null) stmt.close();
-            if (conn != null) conn.close();
+            if (rs != null) {
+                rs.close();
+            }
+            if (stmt != null) {
+                stmt.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-    
+
     public static void closeConnection(Connection conn, PreparedStatement pstmt, ResultSet rs) {
         try {
-            if (rs != null) rs.close();
-            if (pstmt != null) pstmt.close();
-            if (conn != null) conn.close();
+            if (rs != null) {
+                rs.close();
+            }
+            if (pstmt != null) {
+                pstmt.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static boolean testConnection() {
+        Connection conn = null;
+        try {
+            conn = getConnection();
+            return conn != null && !conn.isClosed();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }

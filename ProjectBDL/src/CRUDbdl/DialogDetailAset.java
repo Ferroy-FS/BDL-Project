@@ -3,105 +3,121 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JDialog.java to edit this template
  */
 package CRUDbdl;
-import javax.swing.border.TitledBorder;
+
+import Login.ConnectDatabaseLoginBDL;
+import java.sql.*;
 import javax.swing.table.DefaultTableModel;
-import java.awt.Frame;
-import javax.swing.JOptionPane;
-import java.util.Optional;
+
 /**
  *
  * @author alghi
  */
 public class DialogDetailAset extends javax.swing.JDialog {
-    
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(DialogDetailAset.class.getName());
-private Object jpaDataAccessObject; 
+
     private String kodeAset;
+    private DefaultTableModel modelRiwayat;
+
     /**
      * Creates new form DialogDetailAset
      */
-   public DialogDetailAset(java.awt.Frame parent, boolean modal, Object jpaContext, String kodeAset) {
+    public DialogDetailAset(java.awt.Frame parent, boolean modal, Object ignoredRepo, String kodeAset) {
         super(parent, modal);
-        this.jpaDataAccessObject = jpaContext; // Simpan EntityManager / AsetRepository
-        this.kodeAset = kodeAset; 
-        
-        // Perbaiki urutan inisialisasi
         initComponents();
-        aturTampilanVisual();
-        muatDataAset(); 
-        
-        // Hapus: pack() dipanggil oleh Form pemanggil (FormAset) setelah ini.
-    }
-    
-public DialogDetailAset(java.awt.Frame parent, boolean modal) {
-        this(parent, modal, null, null); 
-    }
+        this.kodeAset = kodeAset;
 
-private void aturTampilanVisual() {
-    setTitle("Detail Aset & Riwayat Nilai - " + (kodeAset != null ? kodeAset : "")); 
-    
-    pnlInfoAset.setBorder(new TitledBorder("Informasi Aset"));
-    jScrollPaneHistory.setBorder(new TitledBorder("Histori Perubahan Nilai (Penyusutan)"));
-    
-    // PERBAIKI NAMA KOLOM AGAR LEBIH JELAS
-    tblHistory.setModel(new javax.swing.table.DefaultTableModel(
-          new Object [][] {},
-          new String [] {"Tanggal Hitung", "Metode", "Nilai Turun", "Nilai Sisa"} 
-    ));
-}
-private void muatDataAset() {
-  if (this.kodeAset == null || jpaDataAccessObject == null) {
-        System.err.println("Kode Aset atau Repository belum disetel.");
-        return;
-    }
+        // 1. Setup Form
+        setLocationRelativeTo(null);
+        setTitle("Detail Aset & Riwayat");
 
-    try {
-        AsetRepository repo = (AsetRepository) this.jpaDataAccessObject;
-        Optional<Aset> asetOpt = repo.findById(this.kodeAset); 
-
-        if (asetOpt.isPresent()) {
-            Aset aset = asetOpt.get();
-            
-            // 2. Isi Label Informasi Aset (Gunakan formatRupiah dan formatTanggal)
-            lblIsianKodeAset.setText(aset.getKodeAset());
-            lblIsianNamaAset.setText(aset.getNamaAset());
-            lblIisianKategori.setText(aset.getKategori());
-            // GUNAKAN METODE BARU DI KELAS ASET UNTUK TANGGAL
-            lblIsianTanggalPeolehan.setText(Aset.formatTanggal(aset.getTanggalPerolehan())); 
-            lblIsianHargaAwal.setText(Aset.formatRupiah(aset.getHargaAwal())); 
-            lblIsianLokasiSaatIni.setText(aset.getLokasi());
-            lblIsianPJ.setText(aset.getPenanggungJawab());
-            
-
-            setTitle("Detail Aset & Riwayat Nilai - " + aset.getKodeAset());
-            
-            // 3. Isi Tabel Riwayat
-            DefaultTableModel model = (DefaultTableModel) tblHistory.getModel();
-            model.setRowCount(0); // Kosongkan tabel
-            
-            if (aset.getRiwayatPenyusutan() != null) {
-                for (RiwayatPenyusutan riwayat : aset.getRiwayatPenyusutan()) {
-                    model.addRow(new Object[]{
-                        // GUNAKAN METODE BARU DI KELAS ASET UNTUK TANGGAL
-                        Aset.formatTanggal(riwayat.getTanggalHitung()),
-                        riwayat.getMetode(),
-                        Aset.formatRupiah(riwayat.getNilaiTurun()),
-                        Aset.formatRupiah(riwayat.getNilaiSisa())
-                    });
-                }
+        // 2. Setup Table Model
+        modelRiwayat = new DefaultTableModel(new String[]{
+            "ID Maint", "Tgl Mulai", "Tgl Selesai", "Masalah", "Biaya", "Teknisi"
+        }, 0) {
+            @Override
+            public boolean isCellEditable(int row, int col) {
+                return false;
             }
-        } else {
-            System.out.println("Aset dengan kode " + this.kodeAset + " tidak ditemukan.");
-        }
-    } catch (Exception e) {
-        logger.log(java.util.logging.Level.SEVERE, "Error saat memuat data aset", e);
-        JOptionPane.showMessageDialog(this, "Gagal memuat detail aset: " + e.getMessage(), "Error Data", JOptionPane.ERROR_MESSAGE);
+        };
+        tblRiwayat.setModel(modelRiwayat);
+
+        // 3. Load Data
+        loadInfoAset();
+        loadRiwayatMaintenance();
     }
 
-}
-    
-    // ... (rest of initComponents() and main method)
+    private void loadInfoAset() {
+        try {
+            Connection conn = ConnectDatabaseLoginBDL.getConnection();
 
+            // Join to get readable names instead of IDs
+            String sql = "SELECT a.*, k.nama_kategori, l.nama_lokasi, p.nama_pegawai "
+             + "FROM aset a "
+             + "LEFT JOIN kategori k ON a.id_kategori = k.id_kategori "
+             + "LEFT JOIN lokasi l ON a.id_lokasi = l.id_lokasi "
+             + "LEFT JOIN pegawai p ON a.id_pegawai = p.id_pegawai "
+             + "WHERE a.kode_aset_unik = ?";
+
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, kodeAset);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                // Format Currency
+                double nilai = rs.getDouble("nilai_buku");
+                java.text.NumberFormat cur = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("id", "ID"));
+
+                // Set Text to Labels (Make sure these Variable Names match your GUI!)
+                lblKode.setText(rs.getString("kode_aset_unik"));
+                lblNama.setText(rs.getString("nama_aset"));
+                lblKategori.setText(rs.getString("nama_kategori"));
+                lblLokasi.setText(rs.getString("nama_lokasi"));
+                lblPJ.setText(rs.getString("nama_pegawai"));
+                lblNilai.setText(cur.format(nilai));
+            }
+            conn.close();
+        } catch (Exception e) {
+            System.out.println("Error Info: " + e);
+        }
+    }
+
+    private void loadRiwayatMaintenance() {
+        try {
+            Connection conn = ConnectDatabaseLoginBDL.getConnection();
+
+            // Get Maintenance history + Aggregate Technician Names
+            // We use string_agg to combine multiple technicians into one string
+            String sql = "SELECT m.id_pemeliharaan, m.tanggal_mulai, m.tanggal_selesai, m.deskripsi_masalah, m.total_biaya, "
+             + "(SELECT string_agg(p.nama_pegawai, ', ') FROM pemeliharaan_pegawai pp "
+             + " JOIN pegawai p ON pp.id_pegawai = p.id_pegawai WHERE pp.id_pemeliharaan = m.id_pemeliharaan) as list_teknisi "
+             + "FROM pemeliharaan m "
+             + "WHERE m.kode_aset_unik = ? ORDER BY m.tanggal_mulai DESC";
+
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, kodeAset);
+            ResultSet rs = ps.executeQuery();
+
+            modelRiwayat.setRowCount(0);
+            while (rs.next()) {
+                // Handle Null Date
+                Date tglSelesai = rs.getDate("tanggal_selesai");
+                String selesaiStr = (tglSelesai == null) ? "Sedang Berjalan" : tglSelesai.toString();
+
+                modelRiwayat.addRow(new Object[]{
+                    rs.getString("id_pemeliharaan"),
+                    rs.getString("tanggal_mulai"),
+                    selesaiStr,
+                    rs.getString("deskripsi_masalah"),
+                    rs.getDouble("total_biaya"),
+                    rs.getString("list_teknisi") // e.g. "Budi, Siti"
+                });
+            }
+            conn.close();
+        } catch (Exception e) {
+            System.out.println("Error Riwayat: " + e);
+        }
+    }
+
+    // ... (rest of initComponents() and main method)
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -112,29 +128,29 @@ private void muatDataAset() {
     private void initComponents() {
 
         jScrollPaneHistory = new javax.swing.JScrollPane();
-        tblHistory = new javax.swing.JTable();
+        tblRiwayat = new javax.swing.JTable();
         pnlInfoAset = new javax.swing.JPanel();
         lblKodeAset = new javax.swing.JLabel();
-        lblIsianKodeAset = new javax.swing.JLabel();
+        lblKode = new javax.swing.JLabel();
         lblNamaAset = new javax.swing.JLabel();
-        lblIsianNamaAset = new javax.swing.JLabel();
+        lblNama = new javax.swing.JLabel();
+        lblKategoriTitle = new javax.swing.JLabel();
         lblKategori = new javax.swing.JLabel();
-        lblIisianKategori = new javax.swing.JLabel();
         lblTanggalPerolehan = new javax.swing.JLabel();
         lblIsianTanggalPeolehan = new javax.swing.JLabel();
         lblHargaAwal = new javax.swing.JLabel();
-        lblIsianHargaAwal = new javax.swing.JLabel();
+        lblNilai = new javax.swing.JLabel();
         lblLokasiSaatIni = new javax.swing.JLabel();
-        lblIsianLokasiSaatIni = new javax.swing.JLabel();
+        lblLokasi = new javax.swing.JLabel();
+        lblPJTitle = new javax.swing.JLabel();
         lblPJ = new javax.swing.JLabel();
-        lblIsianPJ = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Detail Aset & Riwayat Nilai");
 
         jScrollPaneHistory.setToolTipText("Histori Perubahan Nilai (Penyusutan)");
 
-        tblHistory.setModel(new javax.swing.table.DefaultTableModel(
+        tblRiwayat.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -145,7 +161,7 @@ private void muatDataAset() {
                 "Tanngal_Hitung", "Metode", "Turun_Nilai", "Nilai_Sisa"
             }
         ));
-        jScrollPaneHistory.setViewportView(tblHistory);
+        jScrollPaneHistory.setViewportView(tblRiwayat);
 
         getContentPane().add(jScrollPaneHistory, java.awt.BorderLayout.CENTER);
 
@@ -154,45 +170,31 @@ private void muatDataAset() {
 
         lblKodeAset.setText("Kode Aset:");
         pnlInfoAset.add(lblKodeAset);
-
-        lblIsianKodeAset.setText("jLabel4");
-        pnlInfoAset.add(lblIsianKodeAset);
+        pnlInfoAset.add(lblKode);
 
         lblNamaAset.setText("Nama Aset:");
         pnlInfoAset.add(lblNamaAset);
+        pnlInfoAset.add(lblNama);
 
-        lblIsianNamaAset.setText("jLabel2");
-        pnlInfoAset.add(lblIsianNamaAset);
-
-        lblKategori.setText("Kategori:");
+        lblKategoriTitle.setText("Kategori:");
+        pnlInfoAset.add(lblKategoriTitle);
         pnlInfoAset.add(lblKategori);
-
-        lblIisianKategori.setText("jLabel11");
-        pnlInfoAset.add(lblIisianKategori);
 
         lblTanggalPerolehan.setText("Tanggal Perolehan:");
         pnlInfoAset.add(lblTanggalPerolehan);
-
-        lblIsianTanggalPeolehan.setText("jLabel6");
         pnlInfoAset.add(lblIsianTanggalPeolehan);
 
         lblHargaAwal.setText("Harga Awal:");
         pnlInfoAset.add(lblHargaAwal);
-
-        lblIsianHargaAwal.setText("jLabel12");
-        pnlInfoAset.add(lblIsianHargaAwal);
+        pnlInfoAset.add(lblNilai);
 
         lblLokasiSaatIni.setText("Lokasi Saat Ini:");
         pnlInfoAset.add(lblLokasiSaatIni);
+        pnlInfoAset.add(lblLokasi);
 
-        lblIsianLokasiSaatIni.setText("jLabel14");
-        pnlInfoAset.add(lblIsianLokasiSaatIni);
-
-        lblPJ.setText("Penanggung Jawab");
+        lblPJTitle.setText("Penanggung Jawab");
+        pnlInfoAset.add(lblPJTitle);
         pnlInfoAset.add(lblPJ);
-
-        lblIsianPJ.setText("jLabel13");
-        pnlInfoAset.add(lblIsianPJ);
 
         getContentPane().add(pnlInfoAset, java.awt.BorderLayout.NORTH);
 
@@ -202,58 +204,23 @@ private void muatDataAset() {
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                DialogDetailAset dialog = new DialogDetailAset(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPaneHistory;
     private javax.swing.JLabel lblHargaAwal;
-    private javax.swing.JLabel lblIisianKategori;
-    private javax.swing.JLabel lblIsianHargaAwal;
-    private javax.swing.JLabel lblIsianKodeAset;
-    private javax.swing.JLabel lblIsianLokasiSaatIni;
-    private javax.swing.JLabel lblIsianNamaAset;
-    private javax.swing.JLabel lblIsianPJ;
     private javax.swing.JLabel lblIsianTanggalPeolehan;
     private javax.swing.JLabel lblKategori;
+    private javax.swing.JLabel lblKategoriTitle;
+    private javax.swing.JLabel lblKode;
     private javax.swing.JLabel lblKodeAset;
+    private javax.swing.JLabel lblLokasi;
     private javax.swing.JLabel lblLokasiSaatIni;
+    private javax.swing.JLabel lblNama;
     private javax.swing.JLabel lblNamaAset;
+    private javax.swing.JLabel lblNilai;
     private javax.swing.JLabel lblPJ;
+    private javax.swing.JLabel lblPJTitle;
     private javax.swing.JLabel lblTanggalPerolehan;
     private javax.swing.JPanel pnlInfoAset;
-    private javax.swing.JTable tblHistory;
+    private javax.swing.JTable tblRiwayat;
     // End of variables declaration//GEN-END:variables
 }
-

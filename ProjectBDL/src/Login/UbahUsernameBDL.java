@@ -36,66 +36,63 @@ public class UbahUsernameBDL extends javax.swing.JFrame {
         String password = new String(PasswordField.getPassword());
 
         if (usernameBaru.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Username baru tidak boleh kosong!", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Username baru tidak boleh kosong!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         Connection conn = null;
         PreparedStatement pstmtCheck = null;
-        PreparedStatement pstmtUpdateLogin = null;
-        PreparedStatement pstmtUpdateSecurity = null;
+        PreparedStatement pstmtUpdate = null;
         ResultSet rs = null;
 
         try {
             conn = ConnectDatabaseLoginBDL.getConnection();
 
-            // Cek apakah username baru sudah ada
-            String checkSQL = "SELECT username FROM login WHERE username = ?";
+            // Cek apakah username baru sudah ada di tabel pegawai
+            String checkSQL = "SELECT username FROM pegawai WHERE username = ?";
             pstmtCheck = conn.prepareStatement(checkSQL);
             pstmtCheck.setString(1, usernameBaru);
             rs = pstmtCheck.executeQuery();
 
             if (rs.next()) {
-                JOptionPane.showMessageDialog(this, "Username baru sudah digunakan!", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Username baru sudah digunakan!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            // Verifikasi password
-            String verifySQL = "SELECT username FROM login WHERE username = ? AND passwordnya = ?";
+            // Verifikasi password untuk username lama
+            String verifySQL = "SELECT username FROM pegawai WHERE username = ? AND password = ?";
             pstmtCheck = conn.prepareStatement(verifySQL);
             pstmtCheck.setString(1, usernameLama);
             pstmtCheck.setString(2, password);
             rs = pstmtCheck.executeQuery();
 
             if (!rs.next()) {
-                JOptionPane.showMessageDialog(this, "Password salah!", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Password salah!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             // Mulai transaksi
             conn.setAutoCommit(false);
 
-            // Update tabel login
-            String updateLoginSQL = "UPDATE login SET username = ? WHERE username = ?";
-            pstmtUpdateLogin = conn.prepareStatement(updateLoginSQL);
-            pstmtUpdateLogin.setString(1, usernameBaru);
-            pstmtUpdateLogin.setString(2, usernameLama);
-            pstmtUpdateLogin.executeUpdate();
+            // PERUBAHAN: Update username di tabel pegawai
+            String updateSQL = "UPDATE pegawai SET username = ? WHERE username = ? AND password = ?";
+            pstmtUpdate = conn.prepareStatement(updateSQL);
+            pstmtUpdate.setString(1, usernameBaru);
+            pstmtUpdate.setString(2, usernameLama);
+            pstmtUpdate.setString(3, password);
 
-            // Update tabel security_question
-            String updateSecuritySQL = "UPDATE security_question SET username = ? WHERE username = ?";
-            pstmtUpdateSecurity = conn.prepareStatement(updateSecuritySQL);
-            pstmtUpdateSecurity.setString(1, usernameBaru);
-            pstmtUpdateSecurity.setString(2, usernameLama);
-            pstmtUpdateSecurity.executeUpdate();
+            int rowsUpdated = pstmtUpdate.executeUpdate();
 
-            // Commit transaksi
-            conn.commit();
-
-            JOptionPane.showMessageDialog(this, "Username berhasil diubah!", "Success", JOptionPane.INFORMATION_MESSAGE);
-
-            new LoginBDL().setVisible(true);
-            dispose();
+            if (rowsUpdated > 0) {
+                // Commit transaksi
+                conn.commit();
+                JOptionPane.showMessageDialog(null, "Username berhasil diubah!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                new LoginBDL().setVisible(true);
+                dispose();
+            } else {
+                conn.rollback();
+                JOptionPane.showMessageDialog(null, "Gagal mengubah username!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
 
         } catch (SQLException ex) {
             try {
@@ -105,12 +102,11 @@ public class UbahUsernameBDL extends javax.swing.JFrame {
             } catch (SQLException rollbackEx) {
                 rollbackEx.printStackTrace();
             }
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
         } finally {
-            ConnectDatabaseLoginBDL.closeConnection(conn, pstmtUpdateSecurity, rs);
+            ConnectDatabaseLoginBDL.closeConnection(conn, pstmtUpdate, rs);
             ConnectDatabaseLoginBDL.closeConnection(null, pstmtCheck, null);
-            ConnectDatabaseLoginBDL.closeConnection(null, pstmtUpdateLogin, null);
         }
     }
 
@@ -184,7 +180,6 @@ public class UbahUsernameBDL extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPasswordField PasswordField;
     private javax.swing.JButton btnEnter;

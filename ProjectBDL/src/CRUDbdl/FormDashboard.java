@@ -4,6 +4,13 @@
  */
 package CRUDbdl;
 
+import Login.ConnectDatabaseLoginBDL;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.text.NumberFormat;
+import java.util.Locale;
+
 /**
  *
  * @author afrizal
@@ -15,6 +22,47 @@ public class FormDashboard extends javax.swing.JPanel {
      */
     public FormDashboard() {
         initComponents();
+
+        loadDashboardData(); // <--- Call the loader here
+
+    }
+
+    private void loadDashboardData() {
+        Connection conn = null;
+        try {
+            conn = ConnectDatabaseLoginBDL.getConnection();
+
+            // 1. Total Nilai Aset (Sum of nilai_buku)
+            String sqlAset = "SELECT SUM(nilai_buku) FROM aset";
+            PreparedStatement psAset = conn.prepareStatement(sqlAset);
+            ResultSet rsAset = psAset.executeQuery();
+            if (rsAset.next()) {
+                double total = rsAset.getDouble(1);
+                // Format to Rupiah
+                NumberFormat cur = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
+                jLabel1.setText(cur.format(total));
+            }
+
+            // 2. Stok Kritis (Count items where stock <= min)
+            String sqlStok = "SELECT COUNT(*) FROM inventaris_stok WHERE stok_saat_ini <= stok_minimum";
+            PreparedStatement psStok = conn.prepareStatement(sqlStok);
+            ResultSet rsStok = psStok.executeQuery();
+            if (rsStok.next()) {
+                jLabel5.setText(rsStok.getInt(1) + " Item");
+            }
+
+            // 3. Servis Berjalan (Count maintenance not finished)
+            String sqlServis = "SELECT COUNT(*) FROM pemeliharaan WHERE tanggal_selesai IS NULL";
+            PreparedStatement psServis = conn.prepareStatement(sqlServis);
+            ResultSet rsServis = psServis.executeQuery();
+            if (rsServis.next()) {
+                jLabel7.setText(rsServis.getInt(1) + " Tiket");
+            }
+
+            conn.close();
+        } catch (Exception e) {
+            System.out.println("Error Dashboard: " + e);
+        }
     }
 
     /**

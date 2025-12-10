@@ -33,7 +33,7 @@ public class ValidasiUsernameBDL extends javax.swing.JFrame {
         String username = txtUsername.getText().trim();
 
         if (username.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Username tidak boleh kosong!", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Username tidak boleh kosong!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -44,7 +44,8 @@ public class ValidasiUsernameBDL extends javax.swing.JFrame {
         try {
             conn = ConnectDatabaseLoginBDL.getConnection();
 
-            String sql = "SELECT username FROM login WHERE username = ?";
+            // PERUBAHAN: Query menggunakan tabel pegawai, bukan login
+            String sql = "SELECT username FROM pegawai WHERE username = ?";
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, username);
             rs = pstmt.executeQuery();
@@ -54,11 +55,11 @@ public class ValidasiUsernameBDL extends javax.swing.JFrame {
                 new ValidasiPertanyaanKeamananBDL(username).setVisible(true);
                 dispose();
             } else {
-                JOptionPane.showMessageDialog(this, "Username tidak ditemukan!", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Username tidak ditemukan!", "Error", JOptionPane.ERROR_MESSAGE);
             }
 
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
         } finally {
             ConnectDatabaseLoginBDL.closeConnection(conn, pstmt, rs);
@@ -157,7 +158,6 @@ public class ValidasiUsernameBDL extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnKembaliKeLogin;
     private javax.swing.JButton btnValidasi;

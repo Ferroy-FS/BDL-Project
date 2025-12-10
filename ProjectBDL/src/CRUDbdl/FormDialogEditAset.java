@@ -1,80 +1,120 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JDialog.java to edit this template
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package CRUDbdl;
-import javax.swing.JOptionPane;
-import java.util.Optional;
+
 /**
  *
- * @author alghi
+ * @author afrizal
  */
 public class FormDialogEditAset extends javax.swing.JDialog {
-    
-   private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(FormDialogEditAset.class.getName());
-    private AsetRepository asetRepository;
+
     private String kodeAset;
-    private Aset asetSaatIni;
+
+    // HashMaps to keep track of IDs (Hidden) vs Names (Shown in Combo Box)
+    private java.util.HashMap<String, String> mapKategori = new java.util.HashMap<>();
+    private java.util.HashMap<String, String> mapLokasi = new java.util.HashMap<>();
+    private java.util.HashMap<String, String> mapPegawai = new java.util.HashMap<>();
+
     /**
      * Creates new form FormDialogEditAset
      */
-    // File: FormDialogEditAset.java
-
-// Constructor yang dipanggil dari FormAset (Ini adalah constructor yang benar)
-public FormDialogEditAset(java.awt.Frame parent, boolean modal, AsetRepository repo, String kodeAset) {
+    public FormDialogEditAset(java.awt.Frame parent, boolean modal, Object ignoredRepo, String kodeAset) {
         super(parent, modal);
-        this.asetRepository = repo; // Menerima AsetRepository
-        this.kodeAset = kodeAset;   // Menerima kode aset
         initComponents();
-        
-        // Memuat data setelah komponen diinisialisasi
-        muatDataAsetUntukEdit();
+        this.kodeAset = kodeAset;
+
+        // Setup Form
+        this.setLocationRelativeTo(null); // Center on screen
+        txtKodeAset.setText(kodeAset);
+        txtKodeAset.setEnabled(false); // ID cannot be edited
+
+        loadComboBoxes();
+        loadDataAset();
     }
-    
-    /**
-     * 
-     */
-    public FormDialogEditAset(java.awt.Frame parent, boolean modal) {
-        // Panggil constructor utama dengan nilai null
-        this(parent, modal, null, null);
-    }
-    
-    private void muatDataAsetUntukEdit() {
-        if (asetRepository == null || kodeAset == null) return;
-    
-    // --- TAMBAHAN: MENGISI MODEL COMBO BOX DENGAN DATA DUMMY/MOCK ---
-    // Dalam aplikasi nyata, data ini akan diambil dari database master/referensi
-    String[] kategoriList = new String[] { "Elektronik", "Peralatan Kantor", "Perabotan", "Kendaraan" };
-    String[] lokasiList = new String[] { "Ruang Server", "Lobby Utama", "Ruang Meeting", "Gudang", "Parkiran" };
-    String[] pjList = new String[] { "Afrizal", "Andi", "Budi", "Sinta", "Dewi" };
-    String[] kondisiList = new String[] { "Baik", "Perlu Perbaikan", "Rusak", "Sangat Baik" };
-    
-    cbxKategori.setModel(new javax.swing.DefaultComboBoxModel<>(kategoriList));
-    cbxLokasi.setModel(new javax.swing.DefaultComboBoxModel<>(lokasiList));
-    PenanggungJawab.setModel(new javax.swing.DefaultComboBoxModel<>(pjList));
 
-    // ---------------------------------------------------------------------
+    private void loadComboBoxes() {
+        try {
+            java.sql.Connection conn = Login.ConnectDatabaseLoginBDL.getConnection();
 
-    try {
-        Optional<Aset> asetOpt = asetRepository.findById(kodeAset);
-        if (asetOpt.isPresent()) {
-            asetSaatIni = asetOpt.get();
-            setTitle("Edit Aset: " + kodeAset + " - " + asetSaatIni.getNamaAset());
-            
-            // Set item yang dipilih berdasarkan data aset
-            cbxKategori.setSelectedItem(asetSaatIni.getKategori());
-            cbxLokasi.setSelectedItem(asetSaatIni.getLokasi());
-            PenanggungJawab.setSelectedItem(asetSaatIni.getPenanggungJawab()); 
-        
+            // A. Load Kategori
+            java.sql.ResultSet rs1 = conn.createStatement().executeQuery("SELECT id_kategori, nama_kategori FROM kategori");
+            cbxKategori.removeAllItems();
+            while (rs1.next()) {
+                String id = rs1.getString(1);
+                String nama = rs1.getString(2);
+                cbxKategori.addItem(nama);
+                mapKategori.put(nama, id);
+            }
 
-        } else {
-            JOptionPane.showMessageDialog(this, "Aset tidak ditemukan.", "Error", JOptionPane.ERROR_MESSAGE);
-            this.dispose();
+            // B. Load Lokasi
+            java.sql.ResultSet rs2 = conn.createStatement().executeQuery("SELECT id_lokasi, nama_lokasi FROM lokasi");
+            cbxLokasi.removeAllItems();
+            while (rs2.next()) {
+                String id = rs2.getString(1);
+                String nama = rs2.getString(2);
+                cbxLokasi.addItem(nama);
+                mapLokasi.put(nama, id);
+            }
+
+            // C. Load Pegawai
+            java.sql.ResultSet rs3 = conn.createStatement().executeQuery("SELECT id_pegawai, nama_pegawai FROM pegawai");
+            cbxPenanggungJawab.removeAllItems();
+
+            cbxPenanggungJawab.addItem("-");
+            mapPegawai.put("-", null);
+            while (rs3.next()) {
+                String id = rs3.getString(1);
+                String nama = rs3.getString(2);
+                cbxPenanggungJawab.addItem(nama);
+                mapPegawai.put(nama, id);
+            }
+            conn.close();
+        } catch (Exception e) {
+            System.out.println("Error Load Combo: " + e);
         }
-    } catch (Exception e) {
-        logger.log(java.util.logging.Level.SEVERE, "Gagal memuat data aset untuk edit", e);
     }
 
+    private void loadDataAset() {
+        try {
+            java.sql.Connection conn = Login.ConnectDatabaseLoginBDL.getConnection();
+            String sql = "SELECT * FROM aset WHERE kode_aset_unik = ?";
+            java.sql.PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, kodeAset);
+            java.sql.ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                txtNamaAset.setText(rs.getString("nama_aset"));
+
+                // Select the correct items in ComboBoxes
+                setSelectedCombo(cbxKategori, mapKategori, rs.getString("id_kategori"));
+                setSelectedCombo(cbxLokasi, mapLokasi, rs.getString("id_lokasi"));
+                setSelectedCombo(cbxPenanggungJawab, mapPegawai, rs.getString("id_pegawai"));
+
+                String idPeg = rs.getString("id_pegawai");
+                if (idPeg == null || idPeg.equals("0")) {
+                    cbxPenanggungJawab.setSelectedItem("-");
+                } else {
+                    setSelectedCombo(cbxPenanggungJawab, mapPegawai, idPeg);
+                }
+            }
+            conn.close();
+        } catch (Exception e) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Gagal load data: " + e);
+        }
+    }
+
+    // Helper to find and select item by ID
+    private void setSelectedCombo(javax.swing.JComboBox cbx, java.util.HashMap<String, String> map, String targetId) {
+        for (int i = 0; i < cbx.getItemCount(); i++) {
+            String name = cbx.getItemAt(i).toString();
+            String id = map.get(name);
+            if (id != null && id.equals(targetId)) {
+                cbx.setSelectedIndex(i);
+                break;
+            }
+        }
     }
 
     /**
@@ -86,62 +126,36 @@ public FormDialogEditAset(java.awt.Frame parent, boolean modal, AsetRepository r
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        lblKategori = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
+        txtKodeAset = new javax.swing.JTextField();
+        jLabel2 = new javax.swing.JLabel();
+        txtNamaAset = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
         cbxKategori = new javax.swing.JComboBox<>();
-        lblLokasi = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
         cbxLokasi = new javax.swing.JComboBox<>();
-        lblPenanggungJawab = new javax.swing.JLabel();
-        PenanggungJawab = new javax.swing.JComboBox<>();
-        jLabel6 = new javax.swing.JLabel();
-        jPanel1 = new javax.swing.JPanel();
-        btnBatal = new javax.swing.JButton();
+        cbxPenanggungJawab = new javax.swing.JComboBox<>();
+        jLabel5 = new javax.swing.JLabel();
         btnSimpan = new javax.swing.JButton();
+        btnBatal = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setSize(new java.awt.Dimension(400, 300));
-        getContentPane().setLayout(new java.awt.GridLayout(5, 3, 10, 10));
 
-        lblKategori.setText("Kategori");
-        getContentPane().add(lblKategori);
+        jLabel1.setText("Kode Aset");
+
+        jLabel2.setText("Nama Aset");
+
+        jLabel3.setText("Kategori");
 
         cbxKategori.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        cbxKategori.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cbxKategoriActionPerformed(evt);
-            }
-        });
-        getContentPane().add(cbxKategori);
 
-        lblLokasi.setText("Lokasi");
-        getContentPane().add(lblLokasi);
+        jLabel4.setText("Lokasi");
 
         cbxLokasi.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        cbxLokasi.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cbxLokasiActionPerformed(evt);
-            }
-        });
-        getContentPane().add(cbxLokasi);
 
-        lblPenanggungJawab.setText("Penanggung Jawab");
-        getContentPane().add(lblPenanggungJawab);
+        cbxPenanggungJawab.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
-        PenanggungJawab.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        PenanggungJawab.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                PenanggungJawabActionPerformed(evt);
-            }
-        });
-        getContentPane().add(PenanggungJawab);
-        getContentPane().add(jLabel6);
-
-        btnBatal.setText("Batal");
-        btnBatal.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnBatalActionPerformed(evt);
-            }
-        });
-        jPanel1.add(btnBatal);
+        jLabel5.setText("Penanggung Jawab");
 
         btnSimpan.setText("Simpan");
         btnSimpan.addActionListener(new java.awt.event.ActionListener() {
@@ -149,105 +163,131 @@ public FormDialogEditAset(java.awt.Frame parent, boolean modal, AsetRepository r
                 btnSimpanActionPerformed(evt);
             }
         });
-        jPanel1.add(btnSimpan);
 
-        getContentPane().add(jPanel1);
+        btnBatal.setText("Batal");
+        btnBatal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBatalActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap(67, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(btnSimpan)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnBatal))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addGroup(layout.createSequentialGroup()
+                            .addComponent(jLabel1)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 66, Short.MAX_VALUE)
+                            .addComponent(txtKodeAset, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(layout.createSequentialGroup()
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLabel2)
+                                .addComponent(jLabel3)
+                                .addComponent(jLabel4)
+                                .addComponent(jLabel5))
+                            .addGap(18, 18, 18)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(txtNamaAset, javax.swing.GroupLayout.DEFAULT_SIZE, 193, Short.MAX_VALUE)
+                                .addComponent(cbxKategori, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(cbxLokasi, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(cbxPenanggungJawab, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
+                .addGap(64, 64, 64))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(64, 64, 64)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(txtKodeAset, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(txtNamaAset, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(cbxKategori, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cbxLokasi, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cbxPenanggungJawab, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5))
+                .addGap(26, 26, 26)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnSimpan)
+                    .addComponent(btnBatal))
+                .addGap(64, 64, 64))
+        );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanActionPerformed
         // TODO add your handling code here:
-        if (asetSaatIni == null) return;
-
         try {
-            String kategoriBaru = cbxKategori.getSelectedItem().toString();
-            String lokasiBaru = cbxLokasi.getSelectedItem().toString();
-            String pjBaru = PenanggungJawab.getSelectedItem().toString();
-          
-            
-            // 2. Update objek Aset
-            asetSaatIni.setKategori(kategoriBaru);
-            asetSaatIni.setLokasi(lokasiBaru);
-            asetSaatIni.setPenanggungJawab(pjBaru);
-          
-            
-            // 3. Simpan (UPDATE)
-            asetRepository.save(asetSaatIni); 
-            
-            JOptionPane.showMessageDialog(this, "Perubahan aset berhasil disimpan.", "Sukses", JOptionPane.INFORMATION_MESSAGE);
-            this.dispose(); 
+            java.sql.Connection conn = Login.ConnectDatabaseLoginBDL.getConnection();
+            String sql = "UPDATE aset SET nama_aset=?, id_kategori=?, id_lokasi=?, id_pegawai=? WHERE kode_aset_unik=?";
+            java.sql.PreparedStatement ps = conn.prepareStatement(sql);
+
+            String nama = txtNamaAset.getText();
+            String idKat = mapKategori.get(cbxKategori.getSelectedItem().toString());
+            String idLok = mapLokasi.get(cbxLokasi.getSelectedItem().toString());
+
+            String selectedPegawaiName = cbxPenanggungJawab.getSelectedItem().toString();
+            String idPeg = mapPegawai.get(selectedPegawaiName);
+
+            ps.setString(1, nama);
+            ps.setString(2, idKat);
+            ps.setString(3, idLok);
+
+            if (idPeg == null) {
+                ps.setNull(4, java.sql.Types.INTEGER);
+            } else {
+                ps.setInt(4, Integer.parseInt(idPeg));
+            }
+            ps.setString(5, kodeAset);
+
+            ps.executeUpdate();
+            javax.swing.JOptionPane.showMessageDialog(this, "Data Aset Berhasil Diupdate!");
+            this.dispose(); // Close dialog
 
         } catch (Exception e) {
-            logger.log(java.util.logging.Level.SEVERE, "Gagal menyimpan perubahan aset", e);
-            JOptionPane.showMessageDialog(this, "Gagal menyimpan perubahan: " + e.getMessage(), "Error Database", JOptionPane.ERROR_MESSAGE);
+            javax.swing.JOptionPane.showMessageDialog(this, "Gagal Update: " + e);
         }
-    
     }//GEN-LAST:event_btnSimpanActionPerformed
 
     private void btnBatalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBatalActionPerformed
         // TODO add your handling code here:
+        this.dispose();
     }//GEN-LAST:event_btnBatalActionPerformed
-
-    private void cbxKategoriActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxKategoriActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_cbxKategoriActionPerformed
-
-    private void cbxLokasiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxLokasiActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_cbxLokasiActionPerformed
-
-    private void PenanggungJawabActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PenanggungJawabActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_PenanggungJawabActionPerformed
 
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                FormDialogEditAset dialog = new FormDialogEditAset(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox<String> PenanggungJawab;
     private javax.swing.JButton btnBatal;
     private javax.swing.JButton btnSimpan;
     private javax.swing.JComboBox<String> cbxKategori;
     private javax.swing.JComboBox<String> cbxLokasi;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JLabel lblKategori;
-    private javax.swing.JLabel lblLokasi;
-    private javax.swing.JLabel lblPenanggungJawab;
+    private javax.swing.JComboBox<String> cbxPenanggungJawab;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JTextField txtKodeAset;
+    private javax.swing.JTextField txtNamaAset;
     // End of variables declaration//GEN-END:variables
 }

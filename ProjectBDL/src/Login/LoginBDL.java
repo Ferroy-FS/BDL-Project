@@ -6,6 +6,7 @@ package Login;
 
 import java.sql.*;
 import javax.swing.JOptionPane;
+import CRUDbdl.MainFrame;
 
 /**
  *
@@ -21,7 +22,9 @@ public class LoginBDL extends javax.swing.JFrame {
     public LoginBDL() {
         initComponents();
 
-//        btnLogin.addActionListener(e -> login());
+        btnLogin.addActionListener(e -> login());
+
+        // Set ActionListener untuk label yang bisa diklik
         lblLupaPassword.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 new ValidasiUsernameBDL().setVisible(true);
@@ -37,13 +40,7 @@ public class LoginBDL extends javax.swing.JFrame {
         });
     }
 
-    private void openMainApplication() {
-        CRUDbdl.MainFrame mainForm = new CRUDbdl.MainFrame();
-        mainForm.setVisible(true);
-        this.dispose();
-    }
-
-// Tambahkan method login()
+// Method login() yang sudah disesuaikan
     private void login() {
         String username = txtUsername.getText().trim();
         String password = new String(PasswordField.getPassword());
@@ -55,23 +52,35 @@ public class LoginBDL extends javax.swing.JFrame {
         try {
             conn = ConnectDatabaseLoginBDL.getConnection();
 
-            String sql = "SELECT * FROM login WHERE username = ? AND passwordnya = ?";
+            // PERUBAHAN: Query menggunakan tabel pegawai, bukan login
+            String sql = "SELECT * FROM pegawai WHERE username = ? AND password = ?";
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, username);
             pstmt.setString(2, password);
             rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                JOptionPane.showMessageDialog(this, "Login berhasil!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                String namaPegawai = rs.getString("nama_pegawai");
+                String departemen = rs.getString("departemen");
+
+                JOptionPane.showMessageDialog(null,
+                 "Login berhasil!\n"
+                 + "Nama: " + namaPegawai + "\n"
+                 + "Departemen: " + departemen,
+                 "Success",
+                 JOptionPane.INFORMATION_MESSAGE);
+                MainFrame mainFrame = new MainFrame();
+                mainFrame.setVisible(true);
+                this.dispose();
                 // Di sini Anda bisa membuka form utama aplikasi
                 // new MainForm().setVisible(true);
                 // this.dispose();
             } else {
-                JOptionPane.showMessageDialog(this, "Username atau password salah!", "Login Failed", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Username atau password salah!", "Login Failed", JOptionPane.ERROR_MESSAGE);
             }
 
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
         } finally {
             ConnectDatabaseLoginBDL.closeConnection(conn, pstmt, rs);
@@ -112,11 +121,6 @@ public class LoginBDL extends javax.swing.JFrame {
         });
 
         btnLogin.setText("Login");
-        btnLogin.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnLoginActionPerformed(evt);
-            }
-        });
 
         lblLupaPassword.setText("Lupa password? Klik disini");
         lblLupaPassword.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -153,7 +157,7 @@ public class LoginBDL extends javax.swing.JFrame {
                                     .addComponent(lblLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(txtUsername)
                                     .addComponent(PasswordField, javax.swing.GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE))
-                                .addContainerGap(51, Short.MAX_VALUE))))
+                                .addContainerGap(48, Short.MAX_VALUE))))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(lblLupaPassword)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -183,7 +187,6 @@ public class LoginBDL extends javax.swing.JFrame {
         );
 
         pack();
-        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void txtUsernameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtUsernameActionPerformed
@@ -200,35 +203,9 @@ public class LoginBDL extends javax.swing.JFrame {
 
     }//GEN-LAST:event_lblLupaUsernameMouseClicked
 
-    private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
-        // TODO add your handling code here:
-        openMainApplication();
-    }//GEN-LAST:event_btnLoginActionPerformed
-
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new LoginBDL().setVisible(true));
-    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPasswordField PasswordField;
     private javax.swing.JButton btnLogin;

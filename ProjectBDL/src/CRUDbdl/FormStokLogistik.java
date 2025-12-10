@@ -3,27 +3,30 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
 package CRUDbdl;
+
 import javax.swing.table.DefaultTableModel; // Diperlukan untuk DefaultTableModel
 import java.util.List; // Diperlukan untuk List
 import javax.swing.JOptionPane;
 import java.awt.Frame;
 import javax.swing.SwingUtilities;
+import Login.ConnectDatabaseLoginBDL;
+import java.sql.*;
+
 /**
  *
  * @author afrizal
  */
 public class FormStokLogistik extends javax.swing.JPanel {
-private LogistikRepository logistikRepository;
+
     /**
      * Creates new form FormStokLogistik
      */
     public FormStokLogistik() {
-        this.logistikRepository = new LogistikRepositoryImpl(); 
         initComponents();
         // Muat data saat form dibuka
         muatDataLogistikKeTabel();
     }
-    
+
     // Helper untuk mendapatkan Kode Aset yang dipilih
     private String getLogistikIdDipilih() {
         int barisDipilih = tblinventaris.getSelectedRow();
@@ -34,34 +37,41 @@ private LogistikRepository logistikRepository;
         // Asumsi ID Inventaris ada di kolom pertama (indeks 0)
         return tblinventaris.getValueAt(barisDipilih, 0).toString();
     }
-    
+
     // Helper untuk mendapatkan Frame Induk
     private Frame getParentFrame() {
         return (Frame) SwingUtilities.getWindowAncestor(this);
     }
 
     private void muatDataLogistikKeTabel() {
-        DefaultTableModel model = (DefaultTableModel) tblinventaris.getModel();
-        model.setRowCount(0); // Kosongkan baris yang sudah ada
+        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblinventaris.getModel();
+        model.setRowCount(0);
 
         try {
-            List<Logistik> daftarLogistik = logistikRepository.findAllLogistik();
+            java.sql.Connection conn = Login.ConnectDatabaseLoginBDL.getConnection();
 
-            for (Logistik logistik : daftarLogistik) {
-                // HANYA MUAT 6 KOLOM (Status Ketersediaan DIHILANGKAN)
+            String sql = "SELECT i.id_inventaris, k.nama_kategori, i.nama_barang, "
+             + "i.satuan, i.stok_saat_ini, i.stok_minimum "
+             + "FROM inventaris_stok i "
+             + "LEFT JOIN kategori k ON i.id_kategori = k.id_kategori "
+             + "ORDER BY i.nama_barang ASC";
+
+            java.sql.PreparedStatement ps = conn.prepareStatement(sql);
+            java.sql.ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
                 model.addRow(new Object[]{
-                    logistik.getIdInventaris(),
-                    logistik.getKategori(),
-                    logistik.getNamaBarang(),
-                    logistik.getSatuan(),
-                    logistik.getStokSaatIni(),
-                    logistik.getStokMinimum()
-                    // Kolom Status Ketersediaan dihapus dari model
+                    rs.getString("id_inventaris"),
+                    rs.getString("nama_kategori"), // Shows Name "Elektronik" instead of ID
+                    rs.getString("nama_barang"),
+                    rs.getString("satuan"),
+                    rs.getInt("stok_saat_ini"),
+                    rs.getInt("stok_minimum")
                 });
             }
+            conn.close();
         } catch (Exception e) {
-             javax.swing.JOptionPane.showMessageDialog(this, "Gagal memuat data logistik: " + e.getMessage(), "Error Database", javax.swing.JOptionPane.ERROR_MESSAGE);
-             e.printStackTrace();
+            javax.swing.JOptionPane.showMessageDialog(this, "Gagal load logistik: " + e.getMessage());
         }
     }
 
@@ -149,38 +159,26 @@ private LogistikRepository logistikRepository;
 
     private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
         // TODO add your handling code here:
-                                    
+
         muatDataLogistikKeTabel();
     }//GEN-LAST:event_btnRefreshActionPerformed
 
     private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
-       String idInventaris = getLogistikIdDipilih();
-        if (idInventaris == null) return;
-        
-        Frame parentFrame = getParentFrame();
-        
-        try {
-            // --- KODE UTAMA UNTUK MEMANGGIL DIALOG EDIT ---
-            
-            // Pastikan FormDialogEditLogistik sudah diimport
-            FormDialogEditLogistik formEdit = new FormDialogEditLogistik(
-                parentFrame, 
-                true, 
-                logistikRepository, 
-                idInventaris
-            );
-            
-            formEdit.setLocationRelativeTo(this);
-            formEdit.setVisible(true);
-            
-            // Refresh tabel Logistik setelah dialog ditutup
-            muatDataLogistikKeTabel(); 
-            
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Gagal memanggil form Edit Logistik: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
+        String idInventaris = getLogistikIdDipilih();
+        if (idInventaris == null) {
+            return;
         }
-    
+
+        java.awt.Frame parentFrame = getParentFrame();
+
+        // Pass 'null' because the dialog now handles its own connection
+        FormDialogEditLogistik formEdit = new FormDialogEditLogistik(parentFrame, true, null, idInventaris);
+
+        formEdit.setLocationRelativeTo(this);
+        formEdit.setVisible(true);
+
+        muatDataLogistikKeTabel();
+
     }//GEN-LAST:event_btnEditActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

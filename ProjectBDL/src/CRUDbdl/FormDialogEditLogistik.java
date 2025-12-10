@@ -3,64 +3,75 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JDialog.java to edit this template
  */
 package CRUDbdl;
-import javax.swing.JOptionPane;
-import java.awt.Frame;
-import java.util.Optional;
-import java.util.logging.Logger;
+
 /**
  *
  * @author alghi
  */
- 
-
 public class FormDialogEditLogistik extends javax.swing.JDialog {
-    private static final Logger logger = Logger.getLogger(FormDialogEditLogistik.class.getName());
-private LogistikRepository logistikRepository;
-    private String idInventaris;
-    private Logistik logistikSaatIni;
-    
-public FormDialogEditLogistik(java.awt.Frame parent, boolean modal, LogistikRepository repo, String idInventaris) {
-        super(parent, modal);
-        this.logistikRepository = repo;
-        this.idInventaris = idInventaris;
-        
-         initComponents();
-        // Memuat data setelah komponen diinisialisasi
-        muatDataLogistikUntukEdit();
-       
-    }
-    
-    public FormDialogEditLogistik(java.awt.Frame parent, boolean modal) {
-        this(parent, modal, null, null);
-    }
-    
-    private void muatDataLogistikUntukEdit() {
-      if (logistikRepository == null || idInventaris == null) return;
-        
-        try {
-            // Asumsi LogistikRepository memiliki findById(String id)
-            Optional<Logistik> logistikOpt = logistikRepository.findById(idInventaris);
-            
-            if (logistikOpt.isPresent()) {
-                logistikSaatIni = logistikOpt.get();
-                setTitle("Edit Logistik: " + logistikSaatIni.getNamaBarang());
-                
-                // Mengisi label informasi yang tidak bisa diubah
-                lblIdInventaris.setText(logistikSaatIni.getIdInventaris());
-                lblNamaBarang.setText(logistikSaatIni.getNamaBarang());
-                
-                // Mengisi field input yang dapat diubah
-                txtSatuan.setText(logistikSaatIni.getSatuan());
-                txtStokMinimum.setText(String.valueOf(logistikSaatIni.getStokMinimum()));
 
-            } else {
-                JOptionPane.showMessageDialog(this, "Item logistik tidak ditemukan.", "Error", JOptionPane.ERROR_MESSAGE);
-                this.dispose();
+    private String idInventaris;
+    private java.util.HashMap<String, String> mapKategori = new java.util.HashMap<>();
+
+    public FormDialogEditLogistik(java.awt.Frame parent, boolean modal, Object ignoredRepo, String idInventaris) {
+        super(parent, modal);
+        initComponents();
+        this.idInventaris = idInventaris;
+
+        // Setup Form
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        txtIdInventaris.setText(idInventaris);
+        txtIdInventaris.setEnabled(false); // ID is read-only
+
+        loadKategori();
+        loadData();
+    }
+
+    private void loadKategori() {
+        try {
+            java.sql.Connection conn = Login.ConnectDatabaseLoginBDL.getConnection();
+            java.sql.ResultSet rs = conn.createStatement().executeQuery("SELECT id_kategori, nama_kategori FROM kategori");
+
+            cbxKategori.removeAllItems();
+            while (rs.next()) {
+                String id = rs.getString("id_kategori");
+                String nama = rs.getString("nama_kategori");
+
+                cbxKategori.addItem(nama);
+                mapKategori.put(nama, id);
             }
+            conn.close();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Gagal memuat data logistik: " + e.getMessage(), "Error Database", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-            this.dispose();
+            System.out.println("Error Load Kategori: " + e);
+        }
+    }
+
+    private void loadData() {
+        try {
+            java.sql.Connection conn = Login.ConnectDatabaseLoginBDL.getConnection();
+            String sql = "SELECT * FROM inventaris_stok WHERE id_inventaris = ?";
+            java.sql.PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, idInventaris);
+            java.sql.ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                txtNamaBarang.setText(rs.getString("nama_barang"));
+                txtSatuan.setText(rs.getString("satuan"));
+                txtStok.setText(String.valueOf(rs.getInt("stok_saat_ini")));
+                txtStokMin.setText(String.valueOf(rs.getInt("stok_minimum")));
+
+                // Set ComboBox selection
+                String currentIdKategori = rs.getString("id_kategori");
+                for (String nama : mapKategori.keySet()) {
+                    if (mapKategori.get(nama).equals(currentIdKategori)) {
+                        cbxKategori.setSelectedItem(nama);
+                        break;
+                    }
+                }
+            }
+            conn.close();
+        } catch (Exception e) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Error Load: " + e);
         }
     }
 
@@ -73,23 +84,30 @@ public FormDialogEditLogistik(java.awt.Frame parent, boolean modal, LogistikRepo
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jTextField1 = new javax.swing.JTextField();
         pnlAksi = new javax.swing.JPanel();
         btnBatal = new javax.swing.JButton();
         btnSimpan = new javax.swing.JButton();
         pnlInput = new javax.swing.JPanel();
-        IDInventaris = new javax.swing.JLabel();
-        lblIdInventaris = new javax.swing.JLabel();
-        NamaBarang = new javax.swing.JLabel();
-        lblNamaBarang = new javax.swing.JLabel();
-        SatuanBaru = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
+        txtIdInventaris = new javax.swing.JTextField();
+        jLabel2 = new javax.swing.JLabel();
+        txtNamaBarang = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
+        cbxKategori = new javax.swing.JComboBox<>();
+        jLabel4 = new javax.swing.JLabel();
         txtSatuan = new javax.swing.JTextField();
-        StokMinimum = new javax.swing.JLabel();
-        txtStokMinimum = new javax.swing.JTextField();
+        jLabel5 = new javax.swing.JLabel();
+        txtStok = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        txtStokMin = new javax.swing.JTextField();
+
+        jTextField1.setText("jTextField1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Edit Satuan dan Stok Minimum Logistik");
         setModal(true);
-        setPreferredSize(new java.awt.Dimension(400, 250));
+        setPreferredSize(new java.awt.Dimension(800, 500));
         setResizable(false);
 
         pnlAksi.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
@@ -114,43 +132,35 @@ public FormDialogEditLogistik(java.awt.Frame parent, boolean modal, LogistikRepo
 
         pnlInput.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
         pnlInput.setToolTipText("pnlInput");
-        pnlInput.setLayout(new java.awt.GridLayout(4, 2, 5, 5));
+        pnlInput.setLayout(new java.awt.GridLayout(7, 2));
 
-        IDInventaris.setText("ID Inventaris:");
-        pnlInput.add(IDInventaris);
+        jLabel1.setText("ID Inventaris");
+        pnlInput.add(jLabel1);
 
-        lblIdInventaris.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        lblIdInventaris.setText("jLabel5");
-        pnlInput.add(lblIdInventaris);
+        txtIdInventaris.setEnabled(false);
+        pnlInput.add(txtIdInventaris);
 
-        NamaBarang.setText("Nama Barang:");
-        pnlInput.add(NamaBarang);
+        jLabel2.setText("Nama Barang");
+        pnlInput.add(jLabel2);
+        pnlInput.add(txtNamaBarang);
 
-        lblNamaBarang.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        lblNamaBarang.setText("jLabel3");
-        pnlInput.add(lblNamaBarang);
+        jLabel3.setText("Kategori");
+        pnlInput.add(jLabel3);
 
-        SatuanBaru.setText("Satuan Baru:");
-        pnlInput.add(SatuanBaru);
+        cbxKategori.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        pnlInput.add(cbxKategori);
 
-        txtSatuan.setText("jTextField1");
-        txtSatuan.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtSatuanActionPerformed(evt);
-            }
-        });
+        jLabel4.setText("Satuan");
+        pnlInput.add(jLabel4);
         pnlInput.add(txtSatuan);
 
-        StokMinimum.setText("Stok Minimum Baru:");
-        pnlInput.add(StokMinimum);
+        jLabel5.setText("Stok Saat Ini");
+        pnlInput.add(jLabel5);
+        pnlInput.add(txtStok);
 
-        txtStokMinimum.setText("jTextField2");
-        txtStokMinimum.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtStokMinimumActionPerformed(evt);
-            }
-        });
-        pnlInput.add(txtStokMinimum);
+        jLabel6.setText("Stok Minimum");
+        pnlInput.add(jLabel6);
+        pnlInput.add(txtStokMin);
 
         getContentPane().add(pnlInput, java.awt.BorderLayout.CENTER);
 
@@ -164,93 +174,48 @@ public FormDialogEditLogistik(java.awt.Frame parent, boolean modal, LogistikRepo
 
     private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanActionPerformed
         // TODO add your handling code here:
-        if (logistikSaatIni == null) return;
-        
         try {
-            String satuanBaru = txtSatuan.getText().trim();
-            int stokMinimumBaru = Integer.parseInt(txtStokMinimum.getText().trim());
-            
-            if (satuanBaru.isEmpty() || stokMinimumBaru < 0) {
-                 JOptionPane.showMessageDialog(this, "Satuan tidak boleh kosong dan Stok Minimum harus >= 0.", "Validasi Input", JOptionPane.WARNING_MESSAGE);
-                 return;
-            }
+            java.sql.Connection conn = Login.ConnectDatabaseLoginBDL.getConnection();
+            String sql = "UPDATE inventaris_stok SET nama_barang=?, id_kategori=?, satuan=?, stok_saat_ini=?, stok_minimum=? WHERE id_inventaris=?";
+            java.sql.PreparedStatement ps = conn.prepareStatement(sql);
 
-            // 1. Update objek Logistik
-            logistikSaatIni.setSatuan(satuanBaru);
-            logistikSaatIni.setStokMinimum(stokMinimumBaru);
-            
-            // 2. Simpan (UPDATE) melalui Repository
-            logistikRepository.save(logistikSaatIni); 
-            
-            JOptionPane.showMessageDialog(this, "Perubahan Satuan dan Stok Minimum berhasil disimpan.", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+            ps.setString(1, txtNamaBarang.getText());
+            ps.setString(2, mapKategori.get(cbxKategori.getSelectedItem().toString()));
+            ps.setString(3, txtSatuan.getText());
+            ps.setInt(4, Integer.parseInt(txtStok.getText()));
+            ps.setInt(5, Integer.parseInt(txtStokMin.getText()));
+            ps.setString(6, idInventaris);
+
+            ps.executeUpdate();
+            javax.swing.JOptionPane.showMessageDialog(this, "Data Logistik Diupdate!");
             this.dispose();
 
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Input Stok Minimum harus berupa angka yang valid.", "Validasi Input", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Gagal menyimpan perubahan: " + e.getMessage(), "Error Database", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
+            javax.swing.JOptionPane.showMessageDialog(this, "Gagal Update: " + e);
         }
-    
+
     }//GEN-LAST:event_btnSimpanActionPerformed
-
-    private void txtStokMinimumActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtStokMinimumActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtStokMinimumActionPerformed
-
-    private void txtSatuanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSatuanActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtSatuanActionPerformed
 
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                FormDialogEditLogistik dialog = new FormDialogEditLogistik(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel IDInventaris;
-    private javax.swing.JLabel NamaBarang;
-    private javax.swing.JLabel SatuanBaru;
-    private javax.swing.JLabel StokMinimum;
     private javax.swing.JButton btnBatal;
     private javax.swing.JButton btnSimpan;
-    private javax.swing.JLabel lblIdInventaris;
-    private javax.swing.JLabel lblNamaBarang;
+    private javax.swing.JComboBox<String> cbxKategori;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JTextField jTextField1;
     private javax.swing.JPanel pnlAksi;
     private javax.swing.JPanel pnlInput;
+    private javax.swing.JTextField txtIdInventaris;
+    private javax.swing.JTextField txtNamaBarang;
     private javax.swing.JTextField txtSatuan;
-    private javax.swing.JTextField txtStokMinimum;
+    private javax.swing.JTextField txtStok;
+    private javax.swing.JTextField txtStokMin;
     // End of variables declaration//GEN-END:variables
 }

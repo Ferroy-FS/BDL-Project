@@ -40,7 +40,7 @@ public class LupaUsernameBDL extends javax.swing.JFrame {
         String password = new String(PasswordField.getPassword());
 
         if (kataKunci.length() < 3) {
-            JOptionPane.showMessageDialog(this, "Masukkan minimal 3 karakter untuk pencarian!", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Masukkan minimal 3 karakter untuk pencarian!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -51,8 +51,8 @@ public class LupaUsernameBDL extends javax.swing.JFrame {
         try {
             conn = ConnectDatabaseLoginBDL.getConnection();
 
-            // Cari username yang mengandung kata kunci (case-insensitive)
-            String sql = "SELECT username FROM login WHERE LOWER(username) LIKE LOWER(?) AND passwordnya = ?";
+            // PERUBAHAN: Cari username di tabel pegawai
+            String sql = "SELECT username FROM pegawai WHERE LOWER(username) LIKE LOWER(?) AND password = ?";
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, "%" + kataKunci + "%");
             pstmt.setString(2, password);
@@ -64,7 +64,7 @@ public class LupaUsernameBDL extends javax.swing.JFrame {
             }
 
             if (usernames.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Password salah atau tidak ada username yang cocok!", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Password salah atau tidak ada username yang cocok!", "Error", JOptionPane.ERROR_MESSAGE);
             } else if (usernames.size() == 1) {
                 // Jika hanya satu username yang ditemukan, langsung buka form ubah username
                 new UbahUsernameBDL(usernames.get(0)).setVisible(true);
@@ -87,13 +87,13 @@ public class LupaUsernameBDL extends javax.swing.JFrame {
                             dispose();
                         }
                     } catch (NumberFormatException e) {
-                        JOptionPane.showMessageDialog(this, "Input tidak valid!", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(null, "Input tidak valid!", "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
 
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
         } finally {
             ConnectDatabaseLoginBDL.closeConnection(conn, pstmt, rs);
@@ -202,7 +202,6 @@ public class LupaUsernameBDL extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPasswordField PasswordField;
     private javax.swing.JButton btnEnter;

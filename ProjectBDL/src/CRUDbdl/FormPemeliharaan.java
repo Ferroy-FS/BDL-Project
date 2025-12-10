@@ -14,7 +14,6 @@ import java.util.HashMap;
  *
  * @author afrizal
  */
-
 public class FormPemeliharaan extends javax.swing.JPanel {
 
     private boolean isNew = false;
@@ -36,8 +35,8 @@ public class FormPemeliharaan extends javax.swing.JPanel {
         modelTeknisi = new DefaultTableModel(new String[]{"ID Pegawai", "Nama Teknisi", "Peran"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-            return false; // This makes the cells un-editable
-        }
+                return false; // This makes the cells un-editable
+            }
         };
         jTable2.setModel(modelTeknisi);
 
@@ -45,8 +44,8 @@ public class FormPemeliharaan extends javax.swing.JPanel {
         modelRiwayat = new DefaultTableModel(new String[]{"ID Maint", "Aset", "Tgl Mulai", "Tgl Selesai", "Biaya", "Status"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-            return false; // This makes the cells un-editable
-        }
+                return false; // This makes the cells un-editable
+            }
         };
         jTable1.setModel(modelRiwayat);
 
@@ -60,13 +59,15 @@ public class FormPemeliharaan extends javax.swing.JPanel {
         txtMulai.setText(java.time.LocalDate.now().toString());
 
         modelParts = new DefaultTableModel(new String[]{"ID Inv", "Nama Barang", "Qty"}, 0) {
-        @Override public boolean isCellEditable(int row, int col) { return false; }
-    };
+            @Override
+            public boolean isCellEditable(int row, int col) {
+                return false;
+            }
+        };
 
         tblParts.setModel(modelParts);
 
         loadRiwayat();
-
 
     }
 
@@ -99,118 +100,115 @@ public class FormPemeliharaan extends javax.swing.JPanel {
         }
     }
 
-   private void loadDetailPemeliharaan(String idMaint) {
-    Connection conn = null;
-       try {
-        conn = ConnectDatabaseLoginBDL.getConnection();
+    private void loadDetailPemeliharaan(String idMaint) {
+        Connection conn = null;
+        try {
+            conn = ConnectDatabaseLoginBDL.getConnection();
 
-        // 1. GET MAIN DETAILS
-        String sql = "SELECT * FROM pemeliharaan WHERE id_pemeliharaan = ?";
-        java.sql.PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setString(1, idMaint);
-        java.sql.ResultSet rs = ps.executeQuery();
+            // 1. GET MAIN DETAILS
+            String sql = "SELECT * FROM pemeliharaan WHERE id_pemeliharaan = ?";
+            java.sql.PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, idMaint);
+            java.sql.ResultSet rs = ps.executeQuery();
 
-        if (rs.next()) {
-            // Found it! Fill the fields
-            txtIdMaintenance.setText(rs.getString("id_pemeliharaan"));
-            txtIdAset.setText(rs.getString("kode_aset_unik"));
-            txtMulai.setText(rs.getString("tanggal_mulai"));
+            if (rs.next()) {
+                // Found it! Fill the fields
+                txtIdMaintenance.setText(rs.getString("id_pemeliharaan"));
+                txtIdAset.setText(rs.getString("kode_aset_unik"));
+                txtMulai.setText(rs.getString("tanggal_mulai"));
 
-            java.sql.Date tglSelesai = rs.getDate("tanggal_selesai");
-            txtSelesai.setText(tglSelesai == null ? "" : tglSelesai.toString());
+                Date tglSelesai = rs.getDate("tanggal_selesai");
+                txtSelesai.setText(tglSelesai == null ? "" : tglSelesai.toString());
 
-            txtDeskripsi.setText(rs.getString("deskripsi_masalah"));
-            txtBiaya.setText(String.valueOf(rs.getDouble("total_biaya")));
+                txtDeskripsi.setText(rs.getString("deskripsi_masalah"));
+                txtBiaya.setText(String.valueOf(rs.getDouble("total_biaya")));
 
-            // Trigger the "Cari Aset" logic manually to fill Asset Name
-            // We reuse the existing logic you wrote!
-            btnCariIdAset.doClick();
+//                btnCariIdAset.doClick();
+                // 2. GET TECHNICIANS (Sub-Table)
+                modelTeknisi.setRowCount(0);
+                String sqlTeknisi = "SELECT p.id_pegawai, p.nama_pegawai, pp.keterangan "
+                 + "FROM pemeliharaan_pegawai pp "
+                 + "JOIN pegawai p ON pp.id_pegawai = p.id_pegawai "
+                 + "WHERE pp.id_pemeliharaan = ?";
+                java.sql.PreparedStatement psTek = conn.prepareStatement(sqlTeknisi);
+                psTek.setString(1, idMaint);
+                java.sql.ResultSet rsTek = psTek.executeQuery();
 
-            // 2. GET TECHNICIANS (Sub-Table)
-            modelTeknisi.setRowCount(0);
-            String sqlTeknisi = "SELECT p.id_pegawai, p.nama_pegawai, pp.keterangan " +
-                                "FROM pemeliharaan_pegawai pp " +
-                                "JOIN pegawai p ON pp.id_pegawai = p.id_pegawai " +
-                                "WHERE pp.id_pemeliharaan = ?";
-            java.sql.PreparedStatement psTek = conn.prepareStatement(sqlTeknisi);
-            psTek.setString(1, idMaint);
-            java.sql.ResultSet rsTek = psTek.executeQuery();
+                while (rsTek.next()) {
+                    modelTeknisi.addRow(new Object[]{
+                        rsTek.getString("id_pegawai"),
+                        rsTek.getString("nama_pegawai"),
+                        rsTek.getString("keterangan")
+                    });
+                }
 
-            while(rsTek.next()) {
-                modelTeknisi.addRow(new Object[]{
-                    rsTek.getString("id_pegawai"),
-                    rsTek.getString("nama_pegawai"),
-                    rsTek.getString("keterangan")
-                });
+                // 3. SET BUTTON STATES
+                btnUpdate.setEnabled(true);
+                btnBaru.setEnabled(true);
+                btnSubmit.setEnabled(true);
+
+                // Important: Set flags so Submit knows we are updating
+                isNew = false;
+                isUpdate = true;
+
+                javax.swing.JOptionPane.showMessageDialog(this, "Data dimuat. Klik 'Update' jika ingin mengedit.");
+
+            } else {
+                javax.swing.JOptionPane.showMessageDialog(this, "Data Maintenance ID '" + idMaint + "' tidak ditemukan!");
             }
+            conn.close();
 
-            // 3. SET BUTTON STATES
-            btnUpdate.setEnabled(true);
-            btnBaru.setEnabled(true);
-            btnSubmit.setEnabled(true);
-
-            // Important: Set flags so Submit knows we are updating
-            isNew = false;
-            isUpdate = true;
-
-            javax.swing.JOptionPane.showMessageDialog(this, "Data dimuat. Klik 'Update' jika ingin mengedit.");
-
-        } else {
-            javax.swing.JOptionPane.showMessageDialog(this, "Data Maintenance ID '" + idMaint + "' tidak ditemukan!");
+        } catch (Exception e) {
+            System.out.println("Error Load Detail: " + e);
         }
-        conn.close();
-
-    } catch (Exception e) {
-        System.out.println("Error Load Detail: " + e);
-    }
-}
-
-   private void saveTechnicians(Connection conn, String idMaint) throws SQLException {
-    String sqlTeknisi = "INSERT INTO pemeliharaan_pegawai (id_pegawai, id_pemeliharaan, keterangan) VALUES (?, ?, ?)";
-    PreparedStatement psTeknisi = conn.prepareStatement(sqlTeknisi);
-
-    for (int i = 0; i < modelTeknisi.getRowCount(); i++) {
-        String idPeg = modelTeknisi.getValueAt(i, 0).toString();
-        String peran = modelTeknisi.getValueAt(i, 2).toString();
-
-        psTeknisi.setInt(1, Integer.parseInt(idPeg));
-        psTeknisi.setString(2, idMaint);
-        psTeknisi.setString(3, peran);
-        psTeknisi.addBatch();
-    }
-    psTeknisi.executeBatch();
-}
-
-   private void saveParts(Connection conn, String idMaint) throws SQLException {
-    // 1. Prepare Query for Linking Table
-    String sqlInsert = "INSERT INTO suku_cadang_digunakan (id_inventaris, id_pemeliharaan, kuantitas) VALUES (?, ?, ?)";
-    PreparedStatement psInsert = conn.prepareStatement(sqlInsert);
-
-    // 2. Prepare Query for Stock Deduction
-    String sqlUpdateStock = "UPDATE inventaris_stok SET stok_saat_ini = stok_saat_ini - ? WHERE id_inventaris = ?";
-    PreparedStatement psUpdate = conn.prepareStatement(sqlUpdateStock);
-
-    // 3. Loop through the Parts Table
-    for (int i = 0; i < modelParts.getRowCount(); i++) {
-        String idInv = modelParts.getValueAt(i, 0).toString();
-        int qty = Integer.parseInt(modelParts.getValueAt(i, 2).toString());
-
-        // A. Insert into Usage Table
-        psInsert.setString(1, idInv);
-        psInsert.setString(2, idMaint);
-        psInsert.setInt(3, qty);
-        psInsert.addBatch();
-
-        // B. Decrease Stock
-        psUpdate.setInt(1, qty); // Subtract this amount
-        psUpdate.setString(2, idInv);
-        psUpdate.addBatch();
     }
 
-    // Execute Batches
-    psInsert.executeBatch();
-    psUpdate.executeBatch();
-}
+    private void saveTechnicians(Connection conn, String idMaint) throws SQLException {
+        String sqlTeknisi = "INSERT INTO pemeliharaan_pegawai (id_pegawai, id_pemeliharaan, keterangan) VALUES (?, ?, ?)";
+        PreparedStatement psTeknisi = conn.prepareStatement(sqlTeknisi);
+
+        for (int i = 0; i < modelTeknisi.getRowCount(); i++) {
+            String idPeg = modelTeknisi.getValueAt(i, 0).toString();
+            String peran = modelTeknisi.getValueAt(i, 2).toString();
+
+            psTeknisi.setInt(1, Integer.parseInt(idPeg));
+            psTeknisi.setString(2, idMaint);
+            psTeknisi.setString(3, peran);
+            psTeknisi.addBatch();
+        }
+        psTeknisi.executeBatch();
+    }
+
+    private void saveParts(Connection conn, String idMaint) throws SQLException {
+        // 1. Prepare Query for Linking Table
+        String sqlInsert = "INSERT INTO suku_cadang_digunakan (id_inventaris, id_pemeliharaan, kuantitas) VALUES (?, ?, ?)";
+        PreparedStatement psInsert = conn.prepareStatement(sqlInsert);
+
+        // 2. Prepare Query for Stock Deduction
+        String sqlUpdateStock = "UPDATE inventaris_stok SET stok_saat_ini = stok_saat_ini - ? WHERE id_inventaris = ?";
+        PreparedStatement psUpdate = conn.prepareStatement(sqlUpdateStock);
+
+        // 3. Loop through the Parts Table
+        for (int i = 0; i < modelParts.getRowCount(); i++) {
+            String idInv = modelParts.getValueAt(i, 0).toString();
+            int qty = Integer.parseInt(modelParts.getValueAt(i, 2).toString());
+
+            // A. Insert into Usage Table
+            psInsert.setString(1, idInv);
+            psInsert.setString(2, idMaint);
+            psInsert.setInt(3, qty);
+            psInsert.addBatch();
+
+            // B. Decrease Stock
+            psUpdate.setInt(1, qty); // Subtract this amount
+            psUpdate.setString(2, idInv);
+            psUpdate.addBatch();
+        }
+
+        // Execute Batches
+        psInsert.executeBatch();
+        psUpdate.executeBatch();
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -583,43 +581,42 @@ public class FormPemeliharaan extends javax.swing.JPanel {
     }//GEN-LAST:event_btnHapusTeknisiActionPerformed
 
     private void btnCariIdAsetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCariIdAsetActionPerformed
-    String idAset = txtIdAset.getText().trim();
-    if (idAset.isEmpty()) {
-        JOptionPane.showMessageDialog(null, "Masukkan ID Aset!");
-        return;
-    }
-
-    try {
-        Connection conn = Login.ConnectDatabaseLoginBDL.getConnection();
-        String sql = "SELECT nama_aset, status_aset FROM aset WHERE kode_aset_unik = ?";
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setString(1, idAset);
-        ResultSet rs = ps.executeQuery();
-
-
-        if (rs.next()) {
-            String nama = rs.getString("nama_aset");
-            String status = rs.getString("status_aset");
-            if (isNew && (status.equalsIgnoreCase("Perbaikan") || status.equalsIgnoreCase("Sedang Diperbaiki"))) {
-                JOptionPane.showMessageDialog(null,
-                    "GAGAL: Aset '" + nama + "' sedang dalam perbaikan!\n" +
-                    "Selesaikan maintenance sebelumnya terlebih dahulu.");
-
-                txtNamaAset.setText(""); // Clear the name so they can't submit
-                txtIdAset.setText("");
-                conn.close();
-                return;
-            }
-
-            txtNamaAset.setText(rs.getString("nama_aset"));
-
-        } else {
-            JOptionPane.showMessageDialog(null, "Aset tidak ditemukan!");
-            txtNamaAset.setText("");
+        String idAset = txtIdAset.getText().trim();
+        if (idAset.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Masukkan ID Aset!");
+            return;
         }
-        conn.close();
-    } catch (Exception e) {
-        System.out.println("Error Cari Aset: " + e);
+
+        try {
+            Connection conn = Login.ConnectDatabaseLoginBDL.getConnection();
+            String sql = "SELECT nama_aset, status_aset FROM aset WHERE kode_aset_unik = ?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, idAset);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                String nama = rs.getString("nama_aset");
+                String status = rs.getString("status_aset");
+                if (isNew && (status.equalsIgnoreCase("Perbaikan") || status.equalsIgnoreCase("Sedang Diperbaiki"))) {
+                    JOptionPane.showMessageDialog(null,
+                     "GAGAL: Aset '" + nama + "' sedang dalam perbaikan!\n"
+                     + "Selesaikan maintenance sebelumnya terlebih dahulu.");
+
+                    txtNamaAset.setText(""); // Clear the name so they can't submit
+                    txtIdAset.setText("");
+                    conn.close();
+                    return;
+                }
+
+                txtNamaAset.setText(rs.getString("nama_aset"));
+
+            } else {
+                JOptionPane.showMessageDialog(null, "Aset tidak ditemukan!");
+                txtNamaAset.setText("");
+            }
+            conn.close();
+        } catch (Exception e) {
+            System.out.println("Error Cari Aset: " + e);
     }    }//GEN-LAST:event_btnCariIdAsetActionPerformed
 
     private void btnTugaskanTeknisiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTugaskanTeknisiActionPerformed
