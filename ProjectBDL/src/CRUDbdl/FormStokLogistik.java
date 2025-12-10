@@ -3,18 +3,66 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
 package CRUDbdl;
-
+import javax.swing.table.DefaultTableModel; // Diperlukan untuk DefaultTableModel
+import java.util.List; // Diperlukan untuk List
+import javax.swing.JOptionPane;
+import java.awt.Frame;
+import javax.swing.SwingUtilities;
 /**
  *
  * @author afrizal
  */
 public class FormStokLogistik extends javax.swing.JPanel {
-
+private LogistikRepository logistikRepository;
     /**
      * Creates new form FormStokLogistik
      */
     public FormStokLogistik() {
+        this.logistikRepository = new LogistikRepositoryImpl(); 
         initComponents();
+        // Muat data saat form dibuka
+        muatDataLogistikKeTabel();
+    }
+    
+    // Helper untuk mendapatkan Kode Aset yang dipilih
+    private String getLogistikIdDipilih() {
+        int barisDipilih = tblinventaris.getSelectedRow();
+        if (barisDipilih == -1) {
+            JOptionPane.showMessageDialog(this, "Pilih satu baris item logistik dari tabel.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return null;
+        }
+        // Asumsi ID Inventaris ada di kolom pertama (indeks 0)
+        return tblinventaris.getValueAt(barisDipilih, 0).toString();
+    }
+    
+    // Helper untuk mendapatkan Frame Induk
+    private Frame getParentFrame() {
+        return (Frame) SwingUtilities.getWindowAncestor(this);
+    }
+
+    private void muatDataLogistikKeTabel() {
+        DefaultTableModel model = (DefaultTableModel) tblinventaris.getModel();
+        model.setRowCount(0); // Kosongkan baris yang sudah ada
+
+        try {
+            List<Logistik> daftarLogistik = logistikRepository.findAllLogistik();
+
+            for (Logistik logistik : daftarLogistik) {
+                // HANYA MUAT 6 KOLOM (Status Ketersediaan DIHILANGKAN)
+                model.addRow(new Object[]{
+                    logistik.getIdInventaris(),
+                    logistik.getKategori(),
+                    logistik.getNamaBarang(),
+                    logistik.getSatuan(),
+                    logistik.getStokSaatIni(),
+                    logistik.getStokMinimum()
+                    // Kolom Status Ketersediaan dihapus dari model
+                });
+            }
+        } catch (Exception e) {
+             javax.swing.JOptionPane.showMessageDialog(this, "Gagal memuat data logistik: " + e.getMessage(), "Error Database", javax.swing.JOptionPane.ERROR_MESSAGE);
+             e.printStackTrace();
+        }
     }
 
     /**
@@ -27,11 +75,12 @@ public class FormStokLogistik extends javax.swing.JPanel {
     private void initComponents() {
 
         pnlHeaderInv = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
-        jToolBar1 = new javax.swing.JToolBar();
+        lblMonitor = new javax.swing.JLabel();
+        pnlTombol = new javax.swing.JPanel();
         btnRefresh = new javax.swing.JButton();
+        btnEdit = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tblinventaris = new javax.swing.JTable();
 
         setBackground(new java.awt.Color(255, 255, 255));
         setBorder(javax.swing.BorderFactory.createEmptyBorder(30, 30, 30, 30));
@@ -42,66 +91,105 @@ public class FormStokLogistik extends javax.swing.JPanel {
         pnlHeaderInv.setForeground(new java.awt.Color(255, 255, 255));
         pnlHeaderInv.setLayout(new java.awt.GridLayout(2, 1));
 
-        jLabel2.setBackground(new java.awt.Color(255, 255, 255));
-        jLabel2.setForeground(new java.awt.Color(0, 0, 0));
-        jLabel2.setText("<html><b>📦 MONITOR KETERSEDIAAN BARANG LOGISTIK</b> <span style='background-color:#e74c3c; color:white'</html> ");
-        jLabel2.setToolTipText("");
-        jLabel2.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 0, 5, 0));
-        jLabel2.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
-        jLabel2.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
-        pnlHeaderInv.add(jLabel2);
+        lblMonitor.setBackground(new java.awt.Color(255, 255, 255));
+        lblMonitor.setForeground(new java.awt.Color(0, 0, 0));
+        lblMonitor.setText("<html><b>📦 MONITOR KETERSEDIAAN BARANG LOGISTIK</b> <span style='background-color:#e74c3c; color:white'</html> ");
+        lblMonitor.setToolTipText("");
+        lblMonitor.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 0, 5, 0));
+        lblMonitor.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+        lblMonitor.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
+        pnlHeaderInv.add(lblMonitor);
 
-        jToolBar1.setBackground(new java.awt.Color(255, 255, 255));
-        jToolBar1.setBorder(null);
-        jToolBar1.setForeground(new java.awt.Color(255, 255, 255));
-        jToolBar1.setRollover(true);
-        jToolBar1.setBorderPainted(false);
+        pnlTombol.setBackground(new java.awt.Color(255, 255, 255));
+        pnlTombol.setForeground(new java.awt.Color(255, 255, 255));
+        pnlTombol.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
         btnRefresh.setBackground(new java.awt.Color(255, 255, 255));
         btnRefresh.setForeground(new java.awt.Color(0, 0, 0));
         btnRefresh.setText("🔄 Refresh");
-        btnRefresh.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnRefresh.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         btnRefresh.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnRefreshActionPerformed(evt);
             }
         });
-        jToolBar1.add(btnRefresh);
+        pnlTombol.add(btnRefresh);
 
-        pnlHeaderInv.add(jToolBar1);
+        btnEdit.setBackground(new java.awt.Color(255, 255, 255));
+        btnEdit.setForeground(new java.awt.Color(0, 0, 0));
+        btnEdit.setText("✏️ Edit");
+        btnEdit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEditActionPerformed(evt);
+            }
+        });
+        pnlTombol.add(btnEdit);
+
+        pnlHeaderInv.add(pnlTombol);
 
         add(pnlHeaderInv, java.awt.BorderLayout.NORTH);
 
         jScrollPane1.setBackground(new java.awt.Color(255, 255, 255));
         jScrollPane1.setForeground(new java.awt.Color(0, 0, 0));
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tblinventaris.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null}
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null}
             },
             new String [] {
-                "ID Inventaris", "Kategori", "Nama Barang", "Satuan", "Stok Saat Ini", "Stok Minimum", "Status Ketersediaan"
+                "ID Inventaris", "Kategori", "Nama Barang", "Satuan", "Stok Saat Ini", "Stok Minimum"
             }
         ));
-        jScrollPane1.setViewportView(jTable1);
+        jScrollPane1.setViewportView(tblinventaris);
 
         add(jScrollPane1, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
         // TODO add your handling code here:
+                                    
+        muatDataLogistikKeTabel();
     }//GEN-LAST:event_btnRefreshActionPerformed
 
+    private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
+       String idInventaris = getLogistikIdDipilih();
+        if (idInventaris == null) return;
+        
+        Frame parentFrame = getParentFrame();
+        
+        try {
+            // --- KODE UTAMA UNTUK MEMANGGIL DIALOG EDIT ---
+            
+            // Pastikan FormDialogEditLogistik sudah diimport
+            FormDialogEditLogistik formEdit = new FormDialogEditLogistik(
+                parentFrame, 
+                true, 
+                logistikRepository, 
+                idInventaris
+            );
+            
+            formEdit.setLocationRelativeTo(this);
+            formEdit.setVisible(true);
+            
+            // Refresh tabel Logistik setelah dialog ditutup
+            muatDataLogistikKeTabel(); 
+            
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal memanggil form Edit Logistik: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    
+    }//GEN-LAST:event_btnEditActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnEdit;
     private javax.swing.JButton btnRefresh;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JToolBar jToolBar1;
+    private javax.swing.JLabel lblMonitor;
     private javax.swing.JPanel pnlHeaderInv;
+    private javax.swing.JPanel pnlTombol;
+    private javax.swing.JTable tblinventaris;
     // End of variables declaration//GEN-END:variables
 }

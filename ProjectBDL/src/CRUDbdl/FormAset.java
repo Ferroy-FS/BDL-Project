@@ -3,20 +3,60 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
 package CRUDbdl;
-
+import javax.swing.SwingUtilities; 
+import java.awt.Frame;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import java.util.List;
 /**
  *
  * @author afrizal
  */
 public class FormAset extends javax.swing.JPanel {
-
+private AsetRepository asetRepository;
     /**
      * Creates new form FormAset
      */
     public FormAset() {
+       this.asetRepository = new AsetRepositoryImpl(); 
         initComponents();
+        muatDataAsetKeTabel();
     }
+    private void muatDataAsetKeTabel() {
+        DefaultTableModel model = (DefaultTableModel) tblAset.getModel();
+        model.setRowCount(0); 
+        
+        try {
+            List<Aset> daftarAset = asetRepository.findAll();
 
+            for (Aset aset : daftarAset) {
+                model.addRow(new Object[]{
+                    aset.getKodeAset(), 
+                    aset.getNamaAset(), 
+                    aset.getKategori(), 
+                    aset.getLokasi(), 
+                    aset.getPenanggungJawab(), 
+                    Aset.formatRupiah(aset.getNilaiBuku()), 
+           
+                });
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal memuat data aset: " + e.getMessage(), "Error Database", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+    private String getKodeAsetDipilih() {
+        int barisDipilih = tblAset.getSelectedRow();
+        if (barisDipilih == -1) {
+            JOptionPane.showMessageDialog(this, "Pilih satu baris aset dari tabel.", "Peringatan", JOptionPane.WARNING_MESSAGE);
+            return null;
+        }
+        return tblAset.getValueAt(barisDipilih, 0).toString();
+    }
+private Frame getParentFrame() {
+        // Mencari Window teratas yang berisi komponen ini (JPanel) dan mengembalikannya sebagai Frame.
+     return (Frame) SwingUtilities.getWindowAncestor(this);
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -26,14 +66,12 @@ public class FormAset extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jToolBar1 = new javax.swing.JToolBar();
+        jPanel1 = new javax.swing.JPanel();
         btnRefresh = new javax.swing.JButton();
-        jSeparator3 = new javax.swing.JToolBar.Separator();
-        btnDetail = new javax.swing.JButton();
+        btnDetailRiwayat = new javax.swing.JButton();
         btnEdit = new javax.swing.JButton();
-        btnDelete = new javax.swing.JButton();
-        jSeparator4 = new javax.swing.JToolBar.Separator();
-        btnSusut = new javax.swing.JButton();
+        btnHapusAset = new javax.swing.JButton();
+        btnProsesPenyusutan = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblAset = new javax.swing.JTable();
 
@@ -41,84 +79,76 @@ public class FormAset extends javax.swing.JPanel {
         setForeground(new java.awt.Color(255, 255, 255));
         setLayout(new java.awt.BorderLayout());
 
-        jToolBar1.setBackground(new java.awt.Color(255, 255, 255));
-        jToolBar1.setForeground(new java.awt.Color(255, 255, 255));
-        jToolBar1.setRollover(true);
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel1.setForeground(new java.awt.Color(0, 0, 0));
+        jPanel1.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
         btnRefresh.setBackground(new java.awt.Color(255, 255, 255));
         btnRefresh.setForeground(new java.awt.Color(0, 0, 0));
         btnRefresh.setText("🔄 Refresh");
-        btnRefresh.setFocusable(false);
-        btnRefresh.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnRefresh.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar1.add(btnRefresh);
-        jToolBar1.add(jSeparator3);
-
-        btnDetail.setBackground(new java.awt.Color(255, 255, 255));
-        btnDetail.setForeground(new java.awt.Color(0, 0, 0));
-        btnDetail.setText("📄 Detail & Riwayat");
-        btnDetail.setFocusable(false);
-        btnDetail.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnDetail.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        btnDetail.addActionListener(new java.awt.event.ActionListener() {
+        btnRefresh.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnDetailActionPerformed(evt);
+                btnRefreshActionPerformed(evt);
             }
         });
-        jToolBar1.add(btnDetail);
+        jPanel1.add(btnRefresh);
+
+        btnDetailRiwayat.setBackground(new java.awt.Color(255, 255, 255));
+        btnDetailRiwayat.setForeground(new java.awt.Color(0, 0, 0));
+        btnDetailRiwayat.setText("📄 Detail & Riwayat");
+        btnDetailRiwayat.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDetailRiwayatActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnDetailRiwayat);
 
         btnEdit.setBackground(new java.awt.Color(255, 255, 255));
         btnEdit.setForeground(new java.awt.Color(0, 0, 0));
         btnEdit.setText("✏️ Edit");
-        btnEdit.setFocusable(false);
-        btnEdit.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnEdit.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         btnEdit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnEditActionPerformed(evt);
             }
         });
-        jToolBar1.add(btnEdit);
+        jPanel1.add(btnEdit);
 
-        btnDelete.setBackground(new java.awt.Color(255, 255, 255));
-        btnDelete.setForeground(new java.awt.Color(0, 0, 0));
-        btnDelete.setText("🗑️ Hapus Aset");
-        btnDelete.setFocusable(false);
-        btnDelete.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnDelete.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar1.add(btnDelete);
-        jToolBar1.add(jSeparator4);
-
-        btnSusut.setBackground(new java.awt.Color(102, 255, 255));
-        btnSusut.setForeground(new java.awt.Color(0, 0, 0));
-        btnSusut.setText("📉 Proses Penyusutan");
-        btnSusut.setFocusable(false);
-        btnSusut.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnSusut.setOpaque(true);
-        btnSusut.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        btnSusut.addActionListener(new java.awt.event.ActionListener() {
+        btnHapusAset.setBackground(new java.awt.Color(255, 255, 255));
+        btnHapusAset.setForeground(new java.awt.Color(0, 0, 0));
+        btnHapusAset.setText(" 🗑️ Hapus Aset");
+        btnHapusAset.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSusutActionPerformed(evt);
+                btnHapusAsetActionPerformed(evt);
             }
         });
-        jToolBar1.add(btnSusut);
+        jPanel1.add(btnHapusAset);
 
-        add(jToolBar1, java.awt.BorderLayout.PAGE_START);
+        btnProsesPenyusutan.setBackground(new java.awt.Color(255, 255, 255));
+        btnProsesPenyusutan.setForeground(new java.awt.Color(0, 0, 0));
+        btnProsesPenyusutan.setText(" 📉 Proses Penyusutan");
+        btnProsesPenyusutan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnProsesPenyusutanActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnProsesPenyusutan);
+
+        add(jPanel1, java.awt.BorderLayout.PAGE_START);
 
         jScrollPane1.setBackground(java.awt.Color.white);
         jScrollPane1.setForeground(new java.awt.Color(255, 255, 255));
 
         tblAset.setBackground(new java.awt.Color(255, 255, 255));
-        tblAset.setForeground(new java.awt.Color(255, 255, 255));
+        tblAset.setForeground(new java.awt.Color(0, 0, 0));
         tblAset.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null}
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null}
             },
             new String [] {
-                "Kode Aset", "Nama Aset", "Kategori", "Lokasi", "Penanggung Jawab", "Nilai Buku", "Status"
+                "Kode Aset", "Nama Aset", "Kategori", "Lokasi", "Penanggung Jawab", "Nilai Buku"
             }
         ));
         tblAset.setSelectionBackground(new java.awt.Color(255, 255, 255));
@@ -128,28 +158,94 @@ public class FormAset extends javax.swing.JPanel {
         add(jScrollPane1, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnDetailActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDetailActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btnDetailActionPerformed
-
     private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
         // TODO add your handling code here:
+      String kodeAset = getKodeAsetDipilih();
+        if (kodeAset == null) return;
+        
+        Frame parentFrame = getParentFrame();
+        FormDialogEditAset formEdit = new FormDialogEditAset(parentFrame, true, asetRepository, kodeAset);
+        formEdit.setLocationRelativeTo(this);
+        formEdit.setVisible(true);
+        muatDataAsetKeTabel();
     }//GEN-LAST:event_btnEditActionPerformed
 
-    private void btnSusutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSusutActionPerformed
+    private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_btnSusutActionPerformed
+        muatDataAsetKeTabel();
+    }//GEN-LAST:event_btnRefreshActionPerformed
+
+    private void btnDetailRiwayatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDetailRiwayatActionPerformed
+        // TODO add your handling code here:
+     String kodeAset = getKodeAsetDipilih();
+        if (kodeAset == null) return;
+        
+        Frame owner = (Frame) SwingUtilities.getWindowAncestor(this);
+        
+        try {
+            DialogDetailAset dialogDetail = new DialogDetailAset(
+                owner, 
+                true, 
+                asetRepository, 
+                kodeAset
+            );
+            dialogDetail.pack();
+            dialogDetail.setLocationRelativeTo(owner);
+            dialogDetail.setVisible(true);
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal memuat form Detail: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    
+    
+    
+    }//GEN-LAST:event_btnDetailRiwayatActionPerformed
+
+    private void btnHapusAsetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHapusAsetActionPerformed
+        // TODO add your handling code here:
+        String kodeAset = getKodeAsetDipilih();
+        if (kodeAset == null) return;
+        
+        int konfirmasi = JOptionPane.showConfirmDialog(this, 
+                "Apakah Anda yakin ingin menghapus aset dengan kode: " + kodeAset + "?", 
+                "Konfirmasi Hapus", JOptionPane.YES_NO_OPTION);
+
+        if (konfirmasi == JOptionPane.YES_OPTION) {
+            try {
+                asetRepository.deleteById(kodeAset);
+                JOptionPane.showMessageDialog(this, "Aset berhasil dihapus.", "Sukses", JOptionPane.INFORMATION_MESSAGE);
+                muatDataAsetKeTabel(); 
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Gagal menghapus aset: " + e.getMessage(), "Error Database", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+        }
+    }//GEN-LAST:event_btnHapusAsetActionPerformed
+
+    private void btnProsesPenyusutanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProsesPenyusutanActionPerformed
+        // TODO add your handling code here:
+        try {
+            asetRepository.prosesPenyusutan();
+            JOptionPane.showMessageDialog(this, "Proses penyusutan berhasil dilakukan.", "Informasi", JOptionPane.INFORMATION_MESSAGE);
+            muatDataAsetKeTabel(); 
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Gagal memproses penyusutan: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+                                                     
+
+   
+    }//GEN-LAST:event_btnProsesPenyusutanActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnDelete;
-    private javax.swing.JButton btnDetail;
+    private javax.swing.JButton btnDetailRiwayat;
     private javax.swing.JButton btnEdit;
+    private javax.swing.JButton btnHapusAset;
+    private javax.swing.JButton btnProsesPenyusutan;
     private javax.swing.JButton btnRefresh;
-    private javax.swing.JButton btnSusut;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JToolBar.Separator jSeparator3;
-    private javax.swing.JToolBar.Separator jSeparator4;
-    private javax.swing.JToolBar jToolBar1;
     private javax.swing.JTable tblAset;
     // End of variables declaration//GEN-END:variables
 }
