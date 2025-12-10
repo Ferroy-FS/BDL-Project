@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" 
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" 
+              name="LaporanPemeliharaan" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+    
+    <queryString language="SQL">
+        <![CDATA[
+        SELECT 
+            p.id_pemeliharaan,
+            p.tanggal_mulai,
+            p.deskripsi_masalah,
+            p.total_biaya,
+            a.nama_aset
+        FROM 
+            pemeliharaan p
+        JOIN 
+            aset a ON p.kode_aset_unik = a.kode_aset_unik
+        ORDER BY 
+            p.tanggal_mulai DESC
+        ]]>
+    </queryString>
+
+    <field name="id_pemeliharaan" class="java.lang.String"/>
+    <field name="tanggal_mulai" class="java.sql.Date"/>
+    <field name="nama_aset" class="java.lang.String"/>
+    <field name="deskripsi_masalah" class="java.lang.String"/>
+    <field name="total_biaya" class="java.math.BigDecimal"/>
+
+    <variable name="GrandTotalBiaya" class="java.math.BigDecimal" calculation="Sum">
+        <variableExpression><![CDATA[$F{total_biaya}]]></variableExpression>
+    </variable>
+
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+
+    <title>
+        <band height="79" splitType="Stretch">
+            <staticText>
+                <reportElement x="0" y="20" width="555" height="30"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="18" isBold="true"/>
+                </textElement>
+                <text><![CDATA[LAPORAN RIWAYAT PEMELIHARAAN & BIAYA]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="0" y="50" width="555" height="20"/>
+                <textElement textAlignment="Center">
+                    <font size="12"/>
+                </textElement>
+                <text><![CDATA[Sistem Manajemen Aset]]></text>
+            </staticText>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="30" splitType="Stretch">
+            <rectangle>
+                <reportElement x="0" y="0" width="555" height="30" backcolor="#E0E0E0"/>
+            </rectangle>
+            <staticText>
+                <reportElement x="5" y="0" width="80" height="30"/>
+                <textElement verticalAlignment="Middle">
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[Tanggal]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="85" y="0" width="70" height="30"/>
+                <textElement verticalAlignment="Middle">
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[ID Laporan]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="155" y="0" width="120" height="30"/>
+                <textElement verticalAlignment="Middle">
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[Nama Aset]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="275" y="0" width="180" height="30"/>
+                <textElement verticalAlignment="Middle">
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[Deskripsi Masalah]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="455" y="0" width="95" height="30"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[Biaya (Rp)]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="25" splitType="Stretch">
+            <textField pattern="dd/MM/yyyy">
+                <reportElement x="5" y="0" width="80" height="20"/>
+                <textFieldExpression><![CDATA[$F{tanggal_mulai}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="85" y="0" width="70" height="20"/>
+                <textFieldExpression><![CDATA[$F{id_pemeliharaan}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="155" y="0" width="120" height="20"/>
+                <textFieldExpression><![CDATA[$F{nama_aset}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="275" y="0" width="180" height="20"/>
+                <textFieldExpression><![CDATA[$F{deskripsi_masalah}]]></textFieldExpression>
+            </textField>
+            <textField pattern="#,##0">
+                <reportElement x="455" y="0" width="95" height="20"/>
+                <textElement textAlignment="Right"/>
+                <textFieldExpression><![CDATA[$F{total_biaya}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement x="0" y="22" width="555" height="1" forecolor="#CCCCCC"/>
+            </line>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="30">
+            <textField>
+                <reportElement x="435" y="0" width="80" height="20"/>
+                <textElement textAlignment="Right"/>
+                <textFieldExpression><![CDATA["Halaman "+$V{PAGE_NUMBER}+" dari"]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="515" y="0" width="40" height="20"/>
+                <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+            <textField pattern="EEEEE dd MMMMM yyyy">
+                <reportElement x="0" y="0" width="197" height="20"/>
+                <textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+    <summary>
+        <band height="42" splitType="Stretch">
+            <rectangle>
+                <reportElement x="0" y="5" width="555" height="30" backcolor="#F0F0F0"/>
+            </rectangle>
+            <staticText>
+                <reportElement x="300" y="5" width="150" height="30"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[TOTAL BIAYA:]]></text>
+            </staticText>
+            <textField pattern="Rp #,##0">
+                <reportElement x="455" y="5" width="95" height="30"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="12" isBold="true" forecolor="#CC0000"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$V{GrandTotalBiaya}]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+
+</jasperReport>
