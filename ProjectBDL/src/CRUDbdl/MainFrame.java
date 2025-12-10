@@ -161,7 +161,12 @@ public class MainFrame extends javax.swing.JFrame {
     private void btnPemeliharaanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPemeliharaanActionPerformed
         // TODO add your handling code here:
         pnlContent.removeAll();
-        pnlContent.add(new FormPemeliharaan());
+
+        javax.swing.JScrollPane scroll = new javax.swing.JScrollPane(new FormPemeliharaan());
+
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+        scroll.setBorder(null);
+        pnlContent.add(scroll, java.awt.BorderLayout.CENTER);
         pnlContent.revalidate();
         pnlContent.repaint();
     }//GEN-LAST:event_btnPemeliharaanActionPerformed
@@ -169,7 +174,11 @@ public class MainFrame extends javax.swing.JFrame {
     private void btnDataMasterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDataMasterActionPerformed
         // TODO add your handling code here:
         pnlContent.removeAll();
-        pnlContent.add(new FormDataMaster());
+        javax.swing.JScrollPane scroll = new javax.swing.JScrollPane(new FormDataMaster());
+
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+        scroll.setBorder(null);
+        pnlContent.add(scroll, java.awt.BorderLayout.CENTER);
         pnlContent.revalidate();
         pnlContent.repaint();
     }//GEN-LAST:event_btnDataMasterActionPerformed

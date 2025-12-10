@@ -51,7 +51,11 @@
                   <Group type="102" attributes="0">
                       <EmptySpace pref="70" max="32767" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="btnTambahAset" min="-2" max="-2" attributes="0"/>
+                          <Group type="102" attributes="0">
+                              <Component id="btnTambahAset" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Component id="btnHapusAset" min="-2" max="-2" attributes="0"/>
+                          </Group>
                           <Group type="102" alignment="0" attributes="0">
                               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                                   <Group type="102" attributes="0">
@@ -71,7 +75,7 @@
                                           <Component id="txtUploadFileAset" pref="200" max="32767" attributes="0"/>
                                           <Component id="cbxKategoriAset" max="32767" attributes="0"/>
                                           <Component id="txtNamaAset" max="32767" attributes="0"/>
-                                          <Component id="txtJumlahAset" max="32767" attributes="0"/>
+                                          <Component id="spnrJumlahAset" alignment="0" max="32767" attributes="0"/>
                                       </Group>
                                   </Group>
                               </Group>
@@ -146,11 +150,14 @@
                       </Group>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="txtJumlahAset" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="jLabel8" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="spnrJumlahAset" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Component id="btnTambahAset" min="-2" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="btnTambahAset" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="btnHapusAset" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
                       <EmptySpace min="-2" pref="48" max="-2" attributes="0"/>
                       <Component id="jScrollPane1" min="-2" pref="186" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="32" max="-2" attributes="0"/>
@@ -182,6 +189,7 @@
             <Component class="javax.swing.JTextField" name="txtIdPembelianAset">
               <Properties>
                 <Property name="editable" type="boolean" value="false"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
             </Component>
             <Component class="javax.swing.JLabel" name="jLabel4">
@@ -190,6 +198,10 @@
               </Properties>
             </Component>
             <Component class="javax.swing.JTextField" name="txtUploadFileAset">
+              <Properties>
+                <Property name="editable" type="boolean" value="false"/>
+                <Property name="enabled" type="boolean" value="false"/>
+              </Properties>
             </Component>
             <Component class="javax.swing.JLabel" name="jLabel5">
               <Properties>
@@ -202,6 +214,9 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="Upload"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnUploadFileAsetActionPerformed"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="jLabel6">
               <Properties>
@@ -235,8 +250,6 @@
                 <Property name="text" type="java.lang.String" value="Jumlah"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JTextField" name="txtJumlahAset">
-            </Component>
             <Component class="javax.swing.JLabel" name="jLabel9">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Harga"/>
@@ -248,6 +261,9 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="Tambah"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnTambahAsetActionPerformed"/>
+              </Events>
             </Component>
             <Container class="javax.swing.JScrollPane" name="jScrollPane1">
               <AuxValues>
@@ -284,6 +300,22 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="Simpan"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSimpanAsetActionPerformed"/>
+              </Events>
+            </Component>
+            <Component class="javax.swing.JSpinner" name="spnrJumlahAset">
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="((javax.swing.JSpinner.DefaultEditor)spnrJumlahAset.getEditor()).getTextField().setHorizontalAlignment(javax.swing.JTextField.LEFT);"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JButton" name="btnHapusAset">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Hapus"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnHapusAsetActionPerformed"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>
@@ -299,7 +331,7 @@
           <Layout>
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jScrollPane2" alignment="0" max="32767" attributes="0"/>
+                  <Component id="jScrollPane2" alignment="0" pref="797" max="32767" attributes="0"/>
                   <Group type="102" alignment="1" attributes="0">
                       <EmptySpace max="32767" attributes="0"/>
                       <Component id="jLabel19" min="-2" max="-2" attributes="0"/>
@@ -318,7 +350,11 @@
                   <Group type="102" attributes="0">
                       <EmptySpace pref="62" max="32767" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="btnTambahInventaris" min="-2" max="-2" attributes="0"/>
+                          <Group type="102" attributes="0">
+                              <Component id="btnTambahInventaris" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Component id="btnHapusInventaris" min="-2" max="-2" attributes="0"/>
+                          </Group>
                           <Group type="102" attributes="0">
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Component id="jLabel12" alignment="0" min="-2" max="-2" attributes="0"/>
@@ -328,29 +364,25 @@
                                   <Component id="jLabel16" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                  <Component id="txtUploadFileInventaris" pref="200" max="32767" attributes="0"/>
+                                  <Component id="txtIdPembelianInventaris" pref="200" max="32767" attributes="0"/>
+                                  <Component id="cbxKategoriInventaris" pref="200" max="32767" attributes="0"/>
+                                  <Component id="txtNamaInventaris" alignment="0" pref="200" max="32767" attributes="0"/>
+                                  <Component id="spnrJumlahInventaris" max="32767" attributes="0"/>
+                              </Group>
+                              <EmptySpace min="-2" pref="48" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="txtJumlahInventaris" min="-2" pref="200" max="-2" attributes="0"/>
-                                  <Group type="102" attributes="0">
+                                  <Component id="btnUploadFileInventaris" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Group type="102" alignment="0" attributes="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
-                                          <Component id="txtUploadFileInventaris" min="-2" pref="200" max="-2" attributes="0"/>
-                                          <Component id="txtIdPembelianInventaris" min="-2" pref="200" max="-2" attributes="0"/>
-                                          <Component id="cbxKategoriInventaris" min="-2" pref="200" max="-2" attributes="0"/>
-                                          <Component id="txtNamaInventaris" alignment="0" min="-2" pref="200" max="-2" attributes="0"/>
+                                          <Component id="jLabel14" alignment="0" min="-2" max="-2" attributes="0"/>
+                                          <Component id="jLabel18" alignment="0" min="-2" max="-2" attributes="0"/>
                                       </Group>
-                                      <EmptySpace min="-2" pref="48" max="-2" attributes="0"/>
-                                      <Group type="103" groupAlignment="0" attributes="0">
-                                          <Component id="btnUploadFileInventaris" alignment="0" min="-2" max="-2" attributes="0"/>
-                                          <Group type="102" alignment="0" attributes="0">
-                                              <Group type="103" groupAlignment="0" attributes="0">
-                                                  <Component id="jLabel14" alignment="0" min="-2" max="-2" attributes="0"/>
-                                                  <Component id="jLabel18" alignment="0" min="-2" max="-2" attributes="0"/>
-                                              </Group>
-                                              <EmptySpace type="separate" max="-2" attributes="0"/>
-                                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                                  <Component id="txtHargaInventaris" alignment="0" max="32767" attributes="0"/>
-                                                  <Component id="txtTglPembelianInventaris" alignment="0" pref="200" max="32767" attributes="0"/>
-                                              </Group>
-                                          </Group>
+                                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                          <Component id="txtHargaInventaris" alignment="0" max="32767" attributes="0"/>
+                                          <Component id="txtTglPembelianInventaris" alignment="0" pref="200" max="32767" attributes="0"/>
                                       </Group>
                                   </Group>
                               </Group>
@@ -392,11 +424,14 @@
                       </Group>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="txtJumlahInventaris" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="jLabel17" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="spnrJumlahInventaris" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Component id="btnTambahInventaris" min="-2" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="btnTambahInventaris" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="btnHapusInventaris" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
                       <EmptySpace min="-2" pref="48" max="-2" attributes="0"/>
                       <Component id="jScrollPane2" min="-2" pref="158" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="32" max="-2" attributes="0"/>
@@ -428,6 +463,7 @@
             <Component class="javax.swing.JTextField" name="txtIdPembelianInventaris">
               <Properties>
                 <Property name="editable" type="boolean" value="false"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
             </Component>
             <Component class="javax.swing.JLabel" name="jLabel13">
@@ -436,6 +472,13 @@
               </Properties>
             </Component>
             <Component class="javax.swing.JTextField" name="txtUploadFileInventaris">
+              <Properties>
+                <Property name="editable" type="boolean" value="false"/>
+                <Property name="enabled" type="boolean" value="false"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtUploadFileInventarisActionPerformed"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="jLabel14">
               <Properties>
@@ -448,6 +491,9 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="Upload"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnUploadFileInventarisActionPerformed"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="jLabel15">
               <Properties>
@@ -481,8 +527,6 @@
                 <Property name="text" type="java.lang.String" value="Jumlah"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JTextField" name="txtJumlahInventaris">
-            </Component>
             <Component class="javax.swing.JLabel" name="jLabel18">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Harga"/>
@@ -494,6 +538,9 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="Tambah"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnTambahInventarisActionPerformed"/>
+              </Events>
             </Component>
             <Container class="javax.swing.JScrollPane" name="jScrollPane2">
               <AuxValues>
@@ -530,6 +577,22 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="Simpan"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSimpanInventarisActionPerformed"/>
+              </Events>
+            </Component>
+            <Component class="javax.swing.JSpinner" name="spnrJumlahInventaris">
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="((javax.swing.JSpinner.DefaultEditor)spnrJumlahInventaris.getEditor()).getTextField().setHorizontalAlignment(javax.swing.JTextField.LEFT);"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JButton" name="btnHapusInventaris">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Hapus"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnHapusInventarisActionPerformed"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>
