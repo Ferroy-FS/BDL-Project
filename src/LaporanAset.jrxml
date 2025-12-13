@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="LaporanAset" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="cf86b706-2df5-4f2b-b3b2-277c8218af26">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="DB Connect"/>
+	<parameter name="StartDate" class="java.util.Date"/>
+	<parameter name="EndDate" class="java.util.Date"/>
+	<parameter name="totalHarga" class="java.lang.Double"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT 
+    kode_aset_unik,
+	nama_aset,
+	tanggal_perolehan,
+	harga_perolehan,
+	nilai_buku,
+	status_aset
+FROM aset
+WHERE tanggal_perolehan >= $P{StartDate} 
+AND 
+    tanggal_perolehan <= $P{EndDate} 
+   Group by kode_aset_unik]]>
+	</queryString>
+	<field name="kode_aset_unik" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="kode_aset_unik"/>
+		<property name="com.jaspersoft.studio.field.label" value="kode_aset_unik"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="aset"/>
+	</field>
+	<field name="nama_aset" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nama_aset"/>
+		<property name="com.jaspersoft.studio.field.label" value="nama_aset"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="aset"/>
+	</field>
+	<field name="tanggal_perolehan" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="tanggal_perolehan"/>
+		<property name="com.jaspersoft.studio.field.label" value="tanggal_perolehan"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="aset"/>
+	</field>
+	<field name="harga_perolehan" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="harga_perolehan"/>
+		<property name="com.jaspersoft.studio.field.label" value="harga_perolehan"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="aset"/>
+	</field>
+	<field name="nilai_buku" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="nilai_buku"/>
+		<property name="com.jaspersoft.studio.field.label" value="nilai_buku"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="aset"/>
+	</field>
+	<field name="status_aset" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="status_aset"/>
+		<property name="com.jaspersoft.studio.field.label" value="status_aset"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="aset"/>
+	</field>
+	<background>
+		<band/>
+	</background>
+	<title>
+		<band height="390">
+			<frame>
+				<reportElement mode="Opaque" x="-20" y="-20" width="595" height="150" backcolor="#006699" uuid="61745e4a-7c8f-46c2-b371-067f7d5196c9"/>
+				<staticText>
+					<reportElement x="0" y="10" width="595" height="43" forecolor="#FFFFFF" uuid="662cda89-d394-4e09-995a-0b64e45851a9"/>
+					<textElement textAlignment="Center">
+						<font size="34" isBold="true"/>
+					</textElement>
+					<text><![CDATA[LAPORAN ASET]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="0" y="60" width="595" height="40" forecolor="#FFFFFF" uuid="394ff05c-20b7-4ef5-aa79-c29c7c9eda13"/>
+					<textElement textAlignment="Center">
+						<font size="16"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Periode: " + new java.text.SimpleDateFormat("dd/MM/yyyy").format($P{StartDate}) + " - " + new java.text.SimpleDateFormat("dd/MM/yyyy").format($P{EndDate})]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="100" width="595" height="40" forecolor="#FFFFFF" uuid="28ef368d-c167-43f2-9eee-350b08a53885"/>
+					<textElement textAlignment="Center">
+						<font size="14"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Dicetak pada: " + new java.text.SimpleDateFormat("dd MMMM yyyy HH:mm").format(new java.util.Date())]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement x="-20" y="190" width="595" height="200" uuid="d5b8c852-5871-417c-9c1b-8a2478da3f03"/>
+			</frame>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="13"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="40">
+			<line>
+				<reportElement x="-18" y="-169" width="595" height="1" forecolor="#666666" uuid="e5106266-6a4b-49c5-80d0-2a36941f2fa3"/>
+			</line>
+			<staticText>
+				<reportElement mode="Opaque" x="2" y="-189" width="92" height="20" forecolor="#006699" backcolor="#E6E6E6" uuid="7e88572d-b3fb-4ea2-880f-9de30de260ca">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4a188a3a-cc2e-414f-9cb4-fa871548e54f"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Kode Aset]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="94" y="-189" width="92" height="20" forecolor="#006699" backcolor="#E6E6E6" uuid="c772ea92-84ba-4191-9906-bc072d5b1d8d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="28953801-40d3-45c0-b204-35529f8a0141"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nama Aset]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="186" y="-189" width="92" height="20" forecolor="#006699" backcolor="#E6E6E6" uuid="95bd94ab-14dd-48d2-aeee-e37a48e8568c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="afde25f4-1fac-404a-9eaf-51dfe2aa3958"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tanggal Diperoleh]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="278" y="-189" width="92" height="20" forecolor="#006699" backcolor="#E6E6E6" uuid="8a6b6787-6008-4d91-b14e-185b79fa2852">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="cee3e826-7658-4eb3-a854-c5e24318a650"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Harga]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="370" y="-189" width="92" height="20" forecolor="#006699" backcolor="#E6E6E6" uuid="c2edc562-63e1-41c9-a09d-58479f19ae9d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="724f3918-beb7-41fe-872d-6a6e8fb4a002"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nilai Buku]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="462" y="-189" width="92" height="20" forecolor="#006699" backcolor="#E6E6E6" uuid="28e7e46f-b963-48d8-98f0-e8533a60c410">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ca3e8522-e7b6-4405-87bc-cd2990242efa"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Status]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="470" y="10" width="100" height="30" uuid="cc9d1c88-7bd8-4dd3-abd1-fc124f8b4b79"/>
+				<textElement textAlignment="Right">
+					<font size="19"/>
+				</textElement>
+				<text><![CDATA[Total]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="50">
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="2" y="-170" width="555" height="1" uuid="ffc5003d-06ee-4ff6-933c-e0a01c1a679c"/>
+			</line>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="2" y="-189" width="92" height="20" uuid="323d26c7-6d70-4d7e-8d96-3be58fcc1829">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4a188a3a-cc2e-414f-9cb4-fa871548e54f"/>
+				</reportElement>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{kode_aset_unik}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="94" y="-189" width="92" height="20" uuid="d6fd9af6-072d-407c-84a2-24dcf5ac94a3">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="28953801-40d3-45c0-b204-35529f8a0141"/>
+				</reportElement>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nama_aset}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="186" y="-189" width="92" height="20" uuid="84f7417e-f427-4b5b-9107-8553f1f3d4a7">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="afde25f4-1fac-404a-9eaf-51dfe2aa3958"/>
+				</reportElement>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tanggal_perolehan}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="278" y="-189" width="92" height="20" uuid="881384d2-46f0-4f24-a9ba-62f4cb99a746">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="cee3e826-7658-4eb3-a854-c5e24318a650"/>
+				</reportElement>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{harga_perolehan}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="370" y="-189" width="92" height="20" uuid="a0092492-0dd0-4e10-bda5-2fe72848da80">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="724f3918-beb7-41fe-872d-6a6e8fb4a002"/>
+				</reportElement>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nilai_buku}]]></textFieldExpression>
+			</textField>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="462" y="-189" width="92" height="20" uuid="0bff0ef4-96b6-4d3a-9f12-928d466e6f31">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ca3e8522-e7b6-4405-87bc-cd2990242efa"/>
+				</reportElement>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{status_aset}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="477" y="10" width="100" height="30" uuid="d0f76031-1db6-41b0-bbe2-59587e9a4a63"/>
+				<textFieldExpression><![CDATA[$P{totalHarga}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band/>
+	</columnFooter>
+	<pageFooter>
+		<band height="30">
+			<textField>
+				<reportElement mode="Opaque" x="2" y="-185" width="515" height="13" backcolor="#E6E6E6" uuid="aef7a655-2621-4e04-b184-cfd1ecb8f679"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement mode="Opaque" x="517" y="-185" width="40" height="13" backcolor="#E6E6E6" uuid="1bc3d8b0-e5ec-4a14-ad97-d1b3f476a09c"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement x="2" y="-185" width="100" height="13" uuid="3e4c90e8-cc2b-43e4-8143-75eb8d883d36"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band/>
+	</summary>
+</jasperReport>
