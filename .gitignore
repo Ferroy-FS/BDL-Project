@@ -1,7 +1,7 @@
-/ProjectBDL/build/
+/build/
 
 # User-specific project settings (open files, window layout, local paths)
-/ProjectBDL/nbproject/private/
+/nbproject/private/
 
 
 # The final executable JARs (NetBeans generates these)
