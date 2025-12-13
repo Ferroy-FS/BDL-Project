@@ -6,3 +6,5 @@
 
 # The final executable JARs (NetBeans generates these)
 /dist/
+
+./uploads/
