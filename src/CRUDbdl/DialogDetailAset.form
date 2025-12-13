@@ -118,12 +118,12 @@
         </Component>
         <Component class="javax.swing.JLabel" name="lblKategori">
         </Component>
-        <Component class="javax.swing.JLabel" name="lblTanggalPerolehan">
+        <Component class="javax.swing.JLabel" name="lblTanggalPerolehanTitle">
           <Properties>
             <Property name="text" type="java.lang.String" value="Tanggal Perolehan:"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JLabel" name="lblIsianTanggalPeolehan">
+        <Component class="javax.swing.JLabel" name="lblTanggalPerolehan">
         </Component>
         <Component class="javax.swing.JLabel" name="lblHargaAwal">
           <Properties>

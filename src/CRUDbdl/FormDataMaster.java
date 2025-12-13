@@ -267,6 +267,38 @@ public class FormDataMaster extends javax.swing.JPanel {
         tblKategori.setModel(modelKategori);
     }
 
+    private void searchDataKategori(String keyword) {
+        Connection conn = null;
+        try {
+            conn = ConnectDatabaseLoginBDL.getConnection();
+        } catch (SQLException ex) {
+            Logger.getLogger(FormDataMaster.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        modelKategori.setRowCount(0);
+
+        try {
+            String sql = "select * from kategori where nama_kategori ilike ?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            ps.setString(1, "%" + keyword + "%");
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                String id = rs.getString("id_kategori");
+                String nama = rs.getString("nama_kategori");
+                String umurEkonomis = rs.getString("umur_ekonomis_tahun");
+                modelKategori.addRow(new Object[]{id, nama, umurEkonomis});
+            }
+
+            ConnectDatabaseLoginBDL.getConnection();
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
     private void loadDataKategori() {
         Connection conn = null;
 
@@ -817,6 +849,11 @@ public class FormDataMaster extends javax.swing.JPanel {
         });
 
         btnCariKategori.setText("Cari");
+        btnCariKategori.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCariKategoriActionPerformed(evt);
+            }
+        });
 
         tblKategori.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -838,6 +875,11 @@ public class FormDataMaster extends javax.swing.JPanel {
         jLabel23.setText("Umur Ekonomis");
 
         btnResetKategori.setText("Reset");
+        btnResetKategori.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnResetKategoriActionPerformed(evt);
+            }
+        });
 
         btnSubmitKategori.setText("Submit");
         btnSubmitKategori.setEnabled(false);
@@ -871,9 +913,8 @@ public class FormDataMaster extends javax.swing.JPanel {
                             .addComponent(spnUmurEkonomis)))
                     .addComponent(jLabel18, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jLabel24)
-                        .addComponent(btnResetKategori))
+                    .addComponent(jLabel24)
+                    .addComponent(btnResetKategori)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(btnBaruKategori)
                         .addGap(18, 18, 18)
@@ -1098,6 +1139,8 @@ public class FormDataMaster extends javax.swing.JPanel {
 
     private void btnResetKaryawanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetKaryawanActionPerformed
         resetFormState();
+        loadDataPegawai();
+        txtCariPegawai.setText("");
     }//GEN-LAST:event_btnResetKaryawanActionPerformed
 
     private void btnHapusPegawaiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHapusPegawaiActionPerformed
@@ -1168,7 +1211,7 @@ public class FormDataMaster extends javax.swing.JPanel {
 
             if (tblPegawai.getRowCount() == 0) {
                 javax.swing.JOptionPane.showMessageDialog(null,
-                 "Data Lokasi tidak ditemukan!",
+                 "Data Pegawai tidak ditemukan!",
                  "Pencarian",
                  javax.swing.JOptionPane.INFORMATION_MESSAGE);
 
@@ -1180,6 +1223,8 @@ public class FormDataMaster extends javax.swing.JPanel {
 
     private void btnResetLokasiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetLokasiActionPerformed
         resetFormLokasi();
+        loadDataLokasi();
+        txtCariLokasi.setText("");
     }//GEN-LAST:event_btnResetLokasiActionPerformed
 
     private void btnSubmitLokasiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSubmitLokasiActionPerformed
@@ -1532,6 +1577,35 @@ public class FormDataMaster extends javax.swing.JPanel {
             javax.swing.JOptionPane.showMessageDialog(null, "Mohon pilih data terlebih dahulu!");
         }
     }//GEN-LAST:event_btnHapusKategoriActionPerformed
+
+    private void btnCariKategoriActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCariKategoriActionPerformed
+        // TODO add your handling code here:
+        String keyword = txtCariKategori.getText();
+
+        if (keyword.trim().isEmpty() || keyword.equals("Cari berdasarkan Nama...")) {
+            javax.swing.JOptionPane.showMessageDialog(null, "Kategori yang anda cari tidak ada");
+            loadDataKategori();
+        } else {
+            searchDataKategori(keyword);
+
+            if (tblKategori.getRowCount() == 0) {
+                javax.swing.JOptionPane.showMessageDialog(null,
+                 "Data Kategori tidak ditemukan!",
+                 "Pencarian",
+                 javax.swing.JOptionPane.INFORMATION_MESSAGE);
+
+                loadDataKategori();
+                txtCariKategori.setText("");
+            }
+        }
+    }//GEN-LAST:event_btnCariKategoriActionPerformed
+
+    private void btnResetKategoriActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetKategoriActionPerformed
+        // TODO add your handling code here:
+        resetFormKategori();
+        loadDataKategori();
+        txtCariKategori.setText("");
+    }//GEN-LAST:event_btnResetKategoriActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBaruKategori;

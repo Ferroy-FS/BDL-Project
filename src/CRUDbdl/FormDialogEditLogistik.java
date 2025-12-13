@@ -107,7 +107,6 @@ public class FormDialogEditLogistik extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Edit Satuan dan Stok Minimum Logistik");
         setModal(true);
-        setPreferredSize(new java.awt.Dimension(800, 500));
         setResizable(false);
 
         pnlAksi.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));

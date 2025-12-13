@@ -10,6 +10,17 @@ import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import Login.ConnectDatabaseLoginBDL;
 import java.sql.*;
+import java.io.File;
+import java.util.HashMap;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.view.JasperViewer;
+import net.sf.jasperreports.engine.design.JasperDesign;
+import net.sf.jasperreports.engine.xml.JRXmlLoader;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperReport;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 /**
  *
@@ -380,6 +391,74 @@ public class FormAset extends javax.swing.JPanel {
 
     private void btnCetakAsetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCetakAsetActionPerformed
         // TODO add your handling code here:
+
+        javax.swing.JTextField txtMulai = new javax.swing.JTextField(10);
+        javax.swing.JTextField txtSelesai = new javax.swing.JTextField(10);
+
+        String currentYear = java.time.Year.now().toString();
+        txtMulai.setText(currentYear + "-01-01"); // Default: Jan 1st
+        txtSelesai.setText(currentYear + "-12-31"); // Default: Dec 31st
+
+        Object[] message = {
+            "Masukkan Periode Laporan:",
+            "Dari Tanggal (YYYY-MM-DD):", txtMulai,
+            "Sampai Tanggal (YYYY-MM-DD):", txtSelesai
+        };
+
+        int option = javax.swing.JOptionPane.showConfirmDialog(this, message, "Filter Laporan Aset", javax.swing.JOptionPane.OK_CANCEL_OPTION);
+
+        if (option == javax.swing.JOptionPane.OK_OPTION) {
+            try {
+                // 2. Capture User Input & Convert to Date
+                // We use java.sql.Date because it works well with Database Dates
+                Date tglMulai = java.sql.Date.valueOf(txtMulai.getText());
+                Date tglSelesai = java.sql.Date.valueOf(txtSelesai.getText());
+
+                // 3. Connect to Database
+                Connection conn = Login.ConnectDatabaseLoginBDL.getConnection();
+
+                // We load the SOURCE file so we can compile it at runtime (avoids version errors)
+                String reportPath = "src/LaporanAset.jrxml";
+                File reportFile = new File(reportPath);
+
+                if (!reportFile.exists()) {
+                    javax.swing.JOptionPane.showMessageDialog(this, "File report tidak ditemukan di: " + reportPath);
+                    return;
+                }
+
+                // 5. Compile the Report
+                JasperDesign design = JRXmlLoader.load(reportFile);
+                JasperReport report = JasperCompileManager.compileReport(design);
+
+                String sql = "select sum(nilai_buku) as total from aset";
+                PreparedStatement psInsert = conn.prepareStatement(sql);
+                ResultSet rs = psInsert.executeQuery();
+
+                double total = 0;
+                if (rs.next()) {
+                    total = rs.getDouble("total");
+                }
+
+                // 6. Pass the Dates into the Parameters HashMap
+                // "startDate" and "endDate" MUST match the Parameter Names in your JasperStudio
+                java.util.HashMap<String, Object> parameters = new java.util.HashMap<>();
+                parameters.put("StartDate", tglMulai);
+                parameters.put("EndDate", tglSelesai);
+                parameters.put("totalHarga", total);
+
+                // 7. Generate and Show Report
+                JasperPrint print = JasperFillManager.fillReport(report, parameters, conn);
+
+                JasperViewer.viewReport(print, false);
+
+            } catch (IllegalArgumentException e) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Format Tanggal Salah! Harap gunakan format YYYY-MM-DD (Contoh: 2023-05-20)");
+            } catch (Exception e) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Error Cetak: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+
     }//GEN-LAST:event_btnCetakAsetActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

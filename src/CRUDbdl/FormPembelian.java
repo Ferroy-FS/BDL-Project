@@ -609,12 +609,15 @@ public class FormPembelian extends javax.swing.JPanel {
             double harga = Double.parseDouble(hargaStr);
             double subtotal = jumlah * harga;
 
+            String hargaFormatted = String.format("%.0f", harga);
+            String subtotalFormatted = String.format("%.0f", subtotal);
+
             modelTambahAset.addRow(new Object[]{
                 kategori,
                 nama,
                 jumlah,
-                harga,
-                subtotal
+                hargaFormatted,
+                subtotalFormatted
             });
             updateTotalAset();
 
@@ -671,7 +674,7 @@ public class FormPembelian extends javax.swing.JPanel {
             String sqlAset = "INSERT INTO aset (id_lokasi, id_kategori, id_pembelian, nama_aset, tanggal_perolehan, harga_perolehan, status_aset, nilai_buku) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement psAset = conn.prepareStatement(sqlAset);
 
-            String defaultLokasi = "LOK-004"; // <--- CHANGE THIS to your actual Gudang/Warehouse ID
+            String defaultLokasi = "LOK-015"; // <--- CHANGE THIS to your actual Gudang/Warehouse ID
 
             String tanggal = txtTglPembelianAset.getText();
 
@@ -682,7 +685,10 @@ public class FormPembelian extends javax.swing.JPanel {
                 String idKategori = mapKategoriAset.get(namaKategori); // Convert Name -> ID
                 String namaAset = tblTambahAset.getValueAt(i, 1).toString();
                 int jumlah = Integer.parseInt(tblTambahAset.getValueAt(i, 2).toString());
-                double harga = Double.parseDouble(tblTambahAset.getValueAt(i, 3).toString());
+
+                String hargaStr = tblTambahAset.getValueAt(i, 3).toString();
+                String cleanHargaStr = hargaStr.replace(",", "").trim();
+                double harga = Double.parseDouble(cleanHargaStr);
 
                 psItem.setString(1, idBukti);
                 psItem.setString(2, idKategori);
@@ -699,14 +705,14 @@ public class FormPembelian extends javax.swing.JPanel {
                 }
 
                 for (int k = 0; k < jumlah; k++) {
-                    psAset.setString(1, defaultLokasi); // Default to Warehouse
+                    psAset.setString(1, defaultLokasi);
                     psAset.setString(2, idKategori);
-                    psAset.setString(3, idPembelian);   // Link to the specific purchase
-                    psAset.setString(4, namaAset);      // "Macbook Pro"
+                    psAset.setString(3, idPembelian);
+                    psAset.setString(4, namaAset);
                     psAset.setDate(5, sqlDate);
                     psAset.setDouble(6, harga);
-                    psAset.setString(7, "Tersedia");    // Default Status
-                    psAset.setDouble(8, harga);    // Default Status
+                    psAset.setString(7, "Tersedia");
+                    psAset.setDouble(8, harga);
 
                     psAset.addBatch(); // Queue this asset
                 }
@@ -776,9 +782,14 @@ public class FormPembelian extends javax.swing.JPanel {
             double harga = Double.parseDouble(hargaStr);
             double subtotal = jumlah * harga;
 
+            String hargaFormatted = String.format("%.0f", harga);
+            String subtotalFormatted = String.format("%.0f", subtotal);
+
             modelTambahInventaris.addRow(new Object[]{
-                nama, kategori, jumlah, harga, subtotal
+                nama, kategori, jumlah, hargaFormatted, subtotalFormatted
             });
+
+            updateTotalInventaris();
 
             double total = 0;
             for (int i = 0; i < modelTambahInventaris.getRowCount(); i++) {
@@ -867,6 +878,7 @@ public class FormPembelian extends javax.swing.JPanel {
                 String namaKategori = tblTambahInventaris.getValueAt(i, 1).toString();
                 String idKategori = mapKategoriInventaris.get(namaKategori);
                 String namaBarang = tblTambahInventaris.getValueAt(i, 0).toString();
+
                 int jumlah = Integer.parseInt(tblTambahInventaris.getValueAt(i, 2).toString());
 
                 psMaster.setString(1, idKategori);
@@ -916,7 +928,18 @@ public class FormPembelian extends javax.swing.JPanel {
     private void updateTotalAset() {
         double total = 0;
         for (int i = 0; i < modelTambahAset.getRowCount(); i++) {
-            total += (double) modelTambahAset.getValueAt(i, 4); // Column 4 is Subtotal
+            // Ambil nilai sebagai String, bersihkan, lalu parse ke double
+            String subtotalStr = modelTambahAset.getValueAt(i, 4).toString();
+
+            // Hapus tanda koma dan karakter formatting lainnya
+            String cleanStr = subtotalStr.replace(",", "").trim();
+
+            try {
+                double subtotal = Double.parseDouble(cleanStr);
+                total += subtotal;
+            } catch (NumberFormatException e) {
+                System.err.println("Error parsing subtotal: " + subtotalStr);
+            }
         }
         txtTotalHargaAset.setText(String.valueOf(total));
     }
@@ -924,9 +947,21 @@ public class FormPembelian extends javax.swing.JPanel {
     private void updateTotalInventaris() {
         double total = 0;
         for (int i = 0; i < modelTambahInventaris.getRowCount(); i++) {
-            total += (double) modelTambahInventaris.getValueAt(i, 4); // Column 4 is Subtotal
+            // Ambil subtotal sebagai String, bersihkan, lalu parse
+            String subtotalStr = modelTambahInventaris.getValueAt(i, 4).toString();
+            String cleanStr = subtotalStr.replace(",", "").trim();
+
+            try {
+                double subtotal = Double.parseDouble(cleanStr);
+                total += subtotal;
+            } catch (NumberFormatException e) {
+                System.err.println("Error parsing subtotal: " + subtotalStr);
+            }
         }
-        txtTotalHargaInventaris.setText(String.valueOf(total));
+
+        // Format total dengan format yang sama
+        String totalFormatted = String.format("%.0f", total);
+        txtTotalHargaInventaris.setText(totalFormatted);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

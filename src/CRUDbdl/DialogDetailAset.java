@@ -73,6 +73,7 @@ public class DialogDetailAset extends javax.swing.JDialog {
                 lblLokasi.setText(rs.getString("nama_lokasi"));
                 lblPJ.setText(rs.getString("nama_pegawai"));
                 lblNilai.setText(cur.format(nilai));
+                lblTanggalPerolehan.setText(rs.getString("tanggal_perolehan"));
             }
             conn.close();
         } catch (Exception e) {
@@ -136,8 +137,8 @@ public class DialogDetailAset extends javax.swing.JDialog {
         lblNama = new javax.swing.JLabel();
         lblKategoriTitle = new javax.swing.JLabel();
         lblKategori = new javax.swing.JLabel();
+        lblTanggalPerolehanTitle = new javax.swing.JLabel();
         lblTanggalPerolehan = new javax.swing.JLabel();
-        lblIsianTanggalPeolehan = new javax.swing.JLabel();
         lblHargaAwal = new javax.swing.JLabel();
         lblNilai = new javax.swing.JLabel();
         lblLokasiSaatIni = new javax.swing.JLabel();
@@ -180,9 +181,9 @@ public class DialogDetailAset extends javax.swing.JDialog {
         pnlInfoAset.add(lblKategoriTitle);
         pnlInfoAset.add(lblKategori);
 
-        lblTanggalPerolehan.setText("Tanggal Perolehan:");
+        lblTanggalPerolehanTitle.setText("Tanggal Perolehan:");
+        pnlInfoAset.add(lblTanggalPerolehanTitle);
         pnlInfoAset.add(lblTanggalPerolehan);
-        pnlInfoAset.add(lblIsianTanggalPeolehan);
 
         lblHargaAwal.setText("Harga Awal:");
         pnlInfoAset.add(lblHargaAwal);
@@ -207,7 +208,6 @@ public class DialogDetailAset extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPaneHistory;
     private javax.swing.JLabel lblHargaAwal;
-    private javax.swing.JLabel lblIsianTanggalPeolehan;
     private javax.swing.JLabel lblKategori;
     private javax.swing.JLabel lblKategoriTitle;
     private javax.swing.JLabel lblKode;
@@ -220,6 +220,7 @@ public class DialogDetailAset extends javax.swing.JDialog {
     private javax.swing.JLabel lblPJ;
     private javax.swing.JLabel lblPJTitle;
     private javax.swing.JLabel lblTanggalPerolehan;
+    private javax.swing.JLabel lblTanggalPerolehanTitle;
     private javax.swing.JPanel pnlInfoAset;
     private javax.swing.JTable tblRiwayat;
     // End of variables declaration//GEN-END:variables

@@ -11,6 +11,15 @@ import java.awt.Frame;
 import javax.swing.SwingUtilities;
 import Login.ConnectDatabaseLoginBDL;
 import java.sql.*;
+import net.sf.jasperreports.engine.design.JasperDesign;
+import net.sf.jasperreports.engine.xml.JRXmlLoader;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.view.JasperViewer;
+import java.io.File;
+import java.util.HashMap;
 
 /**
  *
@@ -89,6 +98,8 @@ public class FormStokLogistik extends javax.swing.JPanel {
         pnlTombol = new javax.swing.JPanel();
         btnRefresh = new javax.swing.JButton();
         btnEdit = new javax.swing.JButton();
+        btnCetakInventaris = new javax.swing.JButton();
+        btnCetakRiwayat = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblinventaris = new javax.swing.JTable();
 
@@ -102,7 +113,6 @@ public class FormStokLogistik extends javax.swing.JPanel {
         pnlHeaderInv.setLayout(new java.awt.GridLayout(2, 1));
 
         lblMonitor.setBackground(new java.awt.Color(255, 255, 255));
-        lblMonitor.setForeground(new java.awt.Color(0, 0, 0));
         lblMonitor.setText("<html><b>📦 MONITOR KETERSEDIAAN BARANG LOGISTIK</b> <span style='background-color:#e74c3c; color:white'</html> ");
         lblMonitor.setToolTipText("");
         lblMonitor.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 0, 5, 0));
@@ -114,8 +124,6 @@ public class FormStokLogistik extends javax.swing.JPanel {
         pnlTombol.setForeground(new java.awt.Color(255, 255, 255));
         pnlTombol.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-        btnRefresh.setBackground(new java.awt.Color(255, 255, 255));
-        btnRefresh.setForeground(new java.awt.Color(0, 0, 0));
         btnRefresh.setText("🔄 Refresh");
         btnRefresh.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -124,8 +132,6 @@ public class FormStokLogistik extends javax.swing.JPanel {
         });
         pnlTombol.add(btnRefresh);
 
-        btnEdit.setBackground(new java.awt.Color(255, 255, 255));
-        btnEdit.setForeground(new java.awt.Color(0, 0, 0));
         btnEdit.setText("✏️ Edit");
         btnEdit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -134,12 +140,27 @@ public class FormStokLogistik extends javax.swing.JPanel {
         });
         pnlTombol.add(btnEdit);
 
+        btnCetakInventaris.setText("Cetak Laporan Inventaris");
+        btnCetakInventaris.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCetakInventarisActionPerformed(evt);
+            }
+        });
+        pnlTombol.add(btnCetakInventaris);
+
+        btnCetakRiwayat.setText("Cetak Riwayat");
+        btnCetakRiwayat.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCetakRiwayatActionPerformed(evt);
+            }
+        });
+        pnlTombol.add(btnCetakRiwayat);
+
         pnlHeaderInv.add(pnlTombol);
 
         add(pnlHeaderInv, java.awt.BorderLayout.NORTH);
 
         jScrollPane1.setBackground(new java.awt.Color(255, 255, 255));
-        jScrollPane1.setForeground(new java.awt.Color(0, 0, 0));
 
         tblinventaris.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -181,7 +202,100 @@ public class FormStokLogistik extends javax.swing.JPanel {
 
     }//GEN-LAST:event_btnEditActionPerformed
 
+    private void btnCetakInventarisActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCetakInventarisActionPerformed
+        // TODO add your handling code here:
+        try {
+            Connection conn = Login.ConnectDatabaseLoginBDL.getConnection();
+
+            // 1. Load & Compile the Report
+            // Make sure the filename matches what you created in Studio
+            String reportPath = "src/LaporanStokLogistik.jrxml";
+            File reportFile = new File(reportPath);
+
+            if (!reportFile.exists()) {
+                javax.swing.JOptionPane.showMessageDialog(this, "File report tidak ditemukan di: " + reportPath);
+                return;
+            }
+
+            JasperDesign design = JRXmlLoader.load(reportFile);
+            JasperReport report = JasperCompileManager.compileReport(design);
+
+            // 2. Parameters (Empty because we don't need date filters for current stock)
+            HashMap<String, Object> parameters = new HashMap<>();
+
+            // Optional: You can pass the "Printed By" name if you want
+            // parameters.put("user", "Admin");
+            // 3. Print
+            JasperPrint print = JasperFillManager.fillReport(report, parameters, conn);
+            JasperViewer.viewReport(print, false); // false = Don't close app on exit
+
+        } catch (Exception e) {
+            javax.swing.JOptionPane.showMessageDialog(null, "Gagal Cetak: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_btnCetakInventarisActionPerformed
+
+    private void btnCetakRiwayatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCetakRiwayatActionPerformed
+        // TODO add your handling code here:
+        javax.swing.JTextField txtMulai = new javax.swing.JTextField(10);
+        javax.swing.JTextField txtSelesai = new javax.swing.JTextField(10);
+
+        String currentYear = java.time.Year.now().toString();
+        txtMulai.setText(currentYear + "-01-01");
+        txtSelesai.setText(currentYear + "-12-31");
+
+        Object[] message = {
+            "Lihat Riwayat Penggunaan Barang:",
+            "Dari Tanggal (YYYY-MM-DD):", txtMulai,
+            "Sampai Tanggal (YYYY-MM-DD):", txtSelesai
+        };
+
+        int option = javax.swing.JOptionPane.showConfirmDialog(null, message, "Filter Riwayat Logistik", javax.swing.JOptionPane.OK_CANCEL_OPTION);
+
+        if (option == javax.swing.JOptionPane.OK_OPTION) {
+            try {
+                // 2. Parse Dates
+                java.sql.Date tglMulai = java.sql.Date.valueOf(txtMulai.getText());
+                java.sql.Date tglSelesai = java.sql.Date.valueOf(txtSelesai.getText());
+
+                java.sql.Connection conn = Login.ConnectDatabaseLoginBDL.getConnection();
+
+                // 3. Load Report
+                String reportPath = "src/LaporanPenggunaan.jrxml";
+                java.io.File reportFile = new java.io.File(reportPath);
+
+                if (!reportFile.exists()) {
+                    javax.swing.JOptionPane.showMessageDialog(this, "File report tidak ditemukan!");
+                    return;
+                }
+
+                // 4. Compile
+                net.sf.jasperreports.engine.design.JasperDesign design = net.sf.jasperreports.engine.xml.JRXmlLoader.load(reportFile);
+                net.sf.jasperreports.engine.JasperReport report = net.sf.jasperreports.engine.JasperCompileManager.compileReport(design);
+
+                // 5. Pass Parameters
+                java.util.HashMap<String, Object> parameters = new java.util.HashMap<>();
+                parameters.put("StartDate", tglMulai);
+                parameters.put("EndDate", tglSelesai);
+
+                // 6. Print
+                net.sf.jasperreports.engine.JasperPrint print
+                 = net.sf.jasperreports.engine.JasperFillManager.fillReport(report, parameters, conn);
+
+                net.sf.jasperreports.view.JasperViewer.viewReport(print, false);
+
+            } catch (IllegalArgumentException e) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Format Tanggal Salah! Gunakan YYYY-MM-DD");
+            } catch (Exception e) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Gagal Cetak: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }//GEN-LAST:event_btnCetakRiwayatActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnCetakInventaris;
+    private javax.swing.JButton btnCetakRiwayat;
     private javax.swing.JButton btnEdit;
     private javax.swing.JButton btnRefresh;
     private javax.swing.JScrollPane jScrollPane1;

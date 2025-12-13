@@ -5,10 +5,16 @@
 package CRUDbdl;
 
 import Login.ConnectDatabaseLoginBDL;
+import java.io.File;
 import java.sql.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JOptionPane;
 import java.util.HashMap;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.design.JasperDesign;
+import net.sf.jasperreports.view.JasperViewer;
 
 /**
  *
@@ -258,6 +264,7 @@ public class FormPemeliharaan extends javax.swing.JPanel {
         btnCariInventaris = new javax.swing.JButton();
         txtPartQty = new javax.swing.JTextField();
         btnHapusInventaris = new javax.swing.JButton();
+        btnCetak = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
 
@@ -398,13 +405,21 @@ public class FormPemeliharaan extends javax.swing.JPanel {
             }
         });
 
+        btnCetak.setText("Cetak Laporan");
+        btnCetak.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCetakActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap(196, Short.MAX_VALUE)
+                .addContainerGap(195, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnCetak)
                     .addComponent(jLabel2)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                         .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
@@ -476,7 +491,7 @@ public class FormPemeliharaan extends javax.swing.JPanel {
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                         .addComponent(btnHapusInventaris, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                     .addComponent(txtMulai, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 398, javax.swing.GroupLayout.PREFERRED_SIZE))))))
-                .addContainerGap(195, Short.MAX_VALUE))
+                .addContainerGap(196, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -543,7 +558,9 @@ public class FormPemeliharaan extends javax.swing.JPanel {
                             .addComponent(btnUpdate)
                             .addComponent(btnSubmit)))
                     .addComponent(btnHapusTeknisi))
-                .addContainerGap(27, Short.MAX_VALUE))
+                .addGap(32, 32, 32)
+                .addComponent(btnCetak)
+                .addGap(32, 32, 32))
         );
 
         jTabbedPane1.addTab("Input Data", jPanel1);
@@ -928,10 +945,65 @@ public class FormPemeliharaan extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_btnHapusInventarisActionPerformed
 
+    private void btnCetakActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCetakActionPerformed
+        javax.swing.JTextField txtMulai = new javax.swing.JTextField(10);
+        javax.swing.JTextField txtSelesai = new javax.swing.JTextField(10);
+
+        String currentYear = java.time.Year.now().toString();
+        txtMulai.setText(currentYear + "-01-01");
+        txtSelesai.setText(currentYear + "-12-31");
+
+        Object[] message = {
+            "Masukkan Periode Pemeliharaan:",
+            "Dari Tanggal (YYYY-MM-DD):", txtMulai,
+            "Sampai Tanggal (YYYY-MM-DD):", txtSelesai
+        };
+
+        int option = javax.swing.JOptionPane.showConfirmDialog(null, message, "Cetak Laporan Biaya", javax.swing.JOptionPane.OK_CANCEL_OPTION);
+
+        if (option == javax.swing.JOptionPane.OK_OPTION) {
+            try {
+                // 2. Parse Dates (Capital Letters matter in Java -> Report Mapping!)
+                Date tglMulai = Date.valueOf(txtMulai.getText());
+                Date tglSelesai = Date.valueOf(txtSelesai.getText());
+
+                Connection conn = ConnectDatabaseLoginBDL.getConnection();
+
+                // 3. Load & Compile
+                String reportPath = "src/LaporanPemeliharaan.jrxml";
+                File reportFile = new File(reportPath);
+
+                if (!reportFile.exists()) {
+                    javax.swing.JOptionPane.showMessageDialog(null, "File report tidak ditemukan!");
+                    return;
+                }
+
+                JasperDesign design = net.sf.jasperreports.engine.xml.JRXmlLoader.load(reportFile);
+                JasperReport report = net.sf.jasperreports.engine.JasperCompileManager.compileReport(design);
+
+                // 4. Pass Parameters (Make sure these match your Jasper Parameter Names EXACTLY)
+                java.util.HashMap<String, Object> parameters = new java.util.HashMap<>();
+                parameters.put("StartDate", tglMulai);
+                parameters.put("EndDate", tglSelesai);
+
+                // 5. Print
+                JasperPrint print
+                 = JasperFillManager.fillReport(report, parameters, conn);
+
+                JasperViewer.viewReport(print, false);
+
+            } catch (Exception e) {
+                javax.swing.JOptionPane.showMessageDialog(null, "Error Cetak: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }//GEN-LAST:event_btnCetakActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBaru;
     private javax.swing.JButton btnCariIdAset;
     private javax.swing.JButton btnCariInventaris;
+    private javax.swing.JButton btnCetak;
     private javax.swing.JButton btnHapusInventaris;
     private javax.swing.JButton btnHapusTeknisi;
     private javax.swing.JButton btnSearchIdMaintenance;
